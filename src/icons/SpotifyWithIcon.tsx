@@ -2,7 +2,7 @@ const SpotifyWithIcon = () => {
     return (
         <svg
             height="60"
-            width="200"
+            width="170"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0.253 0.2769999999999917 558.4269999999998 167.483"
         >

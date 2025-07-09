@@ -32,6 +32,7 @@ const NavBar = () => {
             <SpotifyWithIcon />
             {appUser && (
                 <div className="side-nav-profile-wrapper" ref={profileRef}>
+                    <h4 className="notes-lv1">{appUser.username}</h4>
                     <div
                         className="side-nav-profile-photo"
                         onClick={() => setOpen(true)}

@@ -2,7 +2,7 @@
     background-color: #121212;
     color: white;
     padding: 30px;
-    font-family: 'Helvetica Neue', sans-serif;
+    font-family: "Helvetica Neue", sans-serif;
 }
 
 .artist-header {
@@ -17,7 +17,7 @@
     height: 220px;
     object-fit: cover;
     border-radius: 8px;
-    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
 .artist-header-info .playlist-type {
@@ -156,4 +156,89 @@
     font-weight: bold;
     border: none;
     cursor: pointer;
+}
+
+.btn-play-small {
+    background-color: #1db954;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-play-small:hover {
+    transform: scale(1.1);
+}
+
+.player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #151515;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.player-cover {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    margin-right: 10px;
+    border-radius: 4px;
+}
+
+.player-info {
+    flex-grow: 1;
+}
+
+.player-title {
+    font-size: 14px;
+    color: #fff;
+}
+
+.player-artist {
+    font-size: 12px;
+    color: #b3b3b3;
+}
+
+.player-btn-play {
+    background-color: #1db954;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 10px;
+    transition: transform 0.2s;
+}
+
+.player-btn-play:hover {
+    transform: scale(1.1);
+}
+
+.player-progress {
+    display: flex;
+    align-items: center;
+    width: 30%;
+}
+
+.player-slider {
+    width: 100%;
+    margin: 0 10px;
+}
+
+.player-progress span {
+    font-size: 12px;
+    color: #b3b3b3;
+    min-width: 40px;
 }

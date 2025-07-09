@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAppUser } from "@/hooks/useAppUser";
 import { ArtistRepository } from "@/repositories/ArtistRepository";
 import { SongRepository } from "@/repositories/SongRepository";
@@ -30,10 +30,13 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
     const [isEditSongDialogOpen, setIsEditSongDialogOpen] = useState(false);
     const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
     const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+    const [currentSong, setCurrentSong] = useState<Song | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const router = useRouter();
     const artistRepo = new ArtistRepository();
     const songRepo = new SongRepository();
-    const router = useRouter();
-    const params = useParams();
 
     useEffect(() => {
         if (!appUserLoading && !userLoading && !appUser) {
@@ -43,6 +46,16 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             fetchSongs();
         }
     }, [appUser, appUserLoading, userLoading, artistId]);
+
+    useEffect(() => {
+        if (audioRef.current) {
+            const updateTime = () =>
+                setCurrentTime(audioRef.current?.currentTime || 0);
+            audioRef.current.addEventListener("timeupdate", updateTime);
+            return () =>
+                audioRef.current?.removeEventListener("timeupdate", updateTime);
+        }
+    }, [currentSong]);
 
     const fetchArtist = async () => {
         try {
@@ -214,6 +227,36 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
         }
     };
 
+    const handlePlaySong = (song: Song) => {
+        setCurrentSong(song);
+        if (audioRef.current) {
+            audioRef.current.src = song.audioUrl || "";
+            if (isPlaying) {
+                audioRef.current.pause();
+            } else {
+                audioRef.current
+                    .play()
+                    .catch((err) => console.error("Play failed:", err));
+            }
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const handlePlayAll = () => {
+        if (songs.length > 0) {
+            handlePlaySong(songs[0]);
+        }
+    };
+
+    const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (audioRef.current) {
+            const newTime =
+                (e.target.valueAsNumber / 100) * (currentSong?.duration || 0);
+            audioRef.current.currentTime = newTime;
+            setCurrentTime(newTime);
+        }
+    };
+
     if (!appUser || !artist) {
         return <PageLoader />;
     }
@@ -239,7 +282,9 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             </div>
 
             <div className="artist-actions-bar">
-                <button className="btn-play">▶</button>
+                <button className="btn-play" onClick={handlePlayAll}>
+                    ▶
+                </button>
                 <button className="btn-icon">❤</button>
                 <button className="btn-icon">⋯</button>
 
@@ -285,7 +330,12 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             <div className="songs-list">
                 {songs.map((song, index) => (
                     <div key={song.id} className="song-row">
-                        <div>{index + 1}</div>
+                        <button
+                            className="btn-play-small"
+                            onClick={() => handlePlaySong(song)}
+                        >
+                            ▶
+                        </button>
                         <div className="song-title">
                             {song.imageUrl && (
                                 <img
@@ -344,6 +394,65 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                     </div>
                 ))}
             </div>
+
+            <audio ref={audioRef} onEnded={() => setIsPlaying(false)} />
+            {currentSong && (
+                <div className="player-bar">
+                    <img
+                        src={currentSong.imageUrl || ""}
+                        alt={currentSong.name}
+                        className="player-cover"
+                    />
+                    <div className="player-info">
+                        <div className="player-title">{currentSong.name}</div>
+                        <div className="player-artist">{artist.name}</div>
+                    </div>
+                    <button
+                        className="player-btn-play"
+                        onClick={() => {
+                            if (audioRef.current) {
+                                if (isPlaying) {
+                                    audioRef.current.pause();
+                                } else {
+                                    audioRef.current
+                                        .play()
+                                        .catch((err) =>
+                                            console.error("Play failed:", err),
+                                        );
+                                }
+                                setIsPlaying(!isPlaying);
+                            }
+                        }}
+                    >
+                        {isPlaying ? "⏸" : "▶"}
+                    </button>
+                    <div className="player-progress">
+                        <span>
+                            {Math.floor(currentTime / 60)}:
+                            {(Math.floor(currentTime) % 60)
+                                .toString()
+                                .padStart(2, "0")}
+                        </span>
+                        <input
+                            type="range"
+                            className="player-slider"
+                            min="0"
+                            max="100"
+                            value={
+                                (currentTime / (currentSong.duration || 1)) *
+                                100
+                            }
+                            onChange={handleSliderChange}
+                        />
+                        <span>
+                            {Math.floor(currentSong.duration / 60)}:
+                            {(currentSong.duration % 60)
+                                .toString()
+                                .padStart(2, "0")}
+                        </span>
+                    </div>
+                </div>
+            )}
 
             {appUser?.role === UserRole.ADMIN_USER && (
                 <div className="add-song-wrapper">

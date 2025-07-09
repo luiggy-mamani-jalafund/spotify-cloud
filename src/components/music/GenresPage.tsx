@@ -136,7 +136,7 @@ export default function GenresPage() {
                     </button>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                     {genres.map((genre) => (
                         <div
                             key={genre.id}
@@ -149,11 +149,7 @@ export default function GenresPage() {
                                 <img
                                     src={genre.imageUrl}
                                     alt={genre.name}
-                                    style={{
-                                        width: "300px",
-                                        height: "300px",
-                                    }}
-                                    className="w-full h-48 object-cover"
+                                    className="w-full h-32 object-cover"
                                 />
                             )}
                             <div className="p-4">
@@ -214,6 +210,7 @@ export default function GenresPage() {
                     ))}
                 </div>
 
+                {/* Add Genre Dialog */}
                 {isAddDialogOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-[#121212] p-6 rounded-lg w-full max-w-md">
@@ -294,6 +291,7 @@ export default function GenresPage() {
                     </div>
                 )}
 
+                {/* Edit Genre Dialog */}
                 {isEditDialogOpen && selectedGenre && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-[#121212] p-6 rounded-lg w-full max-w-md">

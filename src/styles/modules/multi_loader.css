@@ -1,0 +1,129 @@
+.loader-container {
+    position: relative;
+    width: 34px;
+    height: 34px;
+}
+
+.first-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 32px;
+    aspect-ratio: 1;
+    --_g: no-repeat
+        radial-gradient(farthest-side, var(--text) 94%, #0000);
+    background: var(--_g) 0 0, var(--_g) 100% 0, var(--_g) 100% 100%,
+        var(--_g) 0 100%;
+    background-size: 40% 40%;
+    animation: l38 0.4s infinite, show-first 6s infinite;
+}
+
+@keyframes l38 {
+    100% {
+        background-position: 100% 0, 100% 100%, 0 100%, 0 0;
+    }
+}
+
+@keyframes show-first {
+    0%,
+    33.333% {
+        opacity: 1;
+    }
+    33.334%,
+    100% {
+        opacity: 0;
+    }
+}
+
+.second-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 33px;
+    aspect-ratio: 1;
+    --_g: no-repeat
+        radial-gradient(farthest-side, var(--text) 90%, #0000);
+    background: var(--_g), var(--_g), var(--_g), var(--_g);
+    background-size: 40% 40%;
+    animation: l46 0.5s infinite, show-second 6s infinite;
+}
+
+@keyframes l46 {
+    0% {
+        background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+    }
+    40%,
+    50% {
+        background-position: 100% 100%, 100% 0, 0 0, 0 100%;
+    }
+    90%,
+    100% {
+        background-position: 100% 100%, 0 100%, 0 0, 100% 0;
+    }
+}
+
+@keyframes show-second {
+    0%,
+    33.333% {
+        opacity: 0;
+    }
+    33.334%,
+    66.666% {
+        opacity: 1;
+    }
+    66.667%,
+    100% {
+        opacity: 0;
+    }
+}
+
+.third-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    --s: 13px;
+    width: calc(var(--s) * 2.45);
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: space-between;
+    animation: l29-0 1s infinite, show-third 6s infinite;
+}
+
+.third-loader::before,
+.third-loader::after {
+    content: "";
+    width: var(--s);
+    --_g: no-repeat
+        radial-gradient(farthest-side, var(--text) 94%, #0000);
+    background: var(--_g) top, var(--_g) bottom;
+    background-size: 100% var(--s);
+    transform-origin: 50% calc(100% - var(--s) / 2);
+    animation: l29-1 1s infinite;
+}
+
+.third-loader::after {
+    --_s: -1;
+}
+
+@keyframes l29-0 {
+    100% {
+        transform: translateY(calc(var(--s) - 100%));
+    }
+}
+
+@keyframes l29-1 {
+    100% {
+        transform: rotate(calc(var(--_s, 1) * -180deg));
+    }
+}
+
+@keyframes show-third {
+    0%,
+    66.666% {
+        opacity: 0;
+    }
+    66.667%,
+    100% {
+        opacity: 1;
+    }
+}

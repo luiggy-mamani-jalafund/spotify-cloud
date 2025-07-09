@@ -1,0 +1,26 @@
+.auth-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 52px;
+
+    min-height: 100vh;
+    padding: 80px;
+}
+
+.auth-form-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    width: 620px;
+    margin-inline: auto;
+}
+
+.auth-nav-wrapper {
+    width: fit-content;
+    margin-inline: auto;
+}
+
+.auth-nav-option[data-state="false"] {
+    opacity: 0.6;
+}

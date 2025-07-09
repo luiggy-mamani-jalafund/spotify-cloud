@@ -1,0 +1,23 @@
+.options-main-wrapper {
+    display: flex;
+    flex-direction: column;
+
+}
+
+.options-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.options-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border: none;
+    padding: 10px 10px;
+}
+
+.options-item:hover {
+    background-color: var(--bg-second);
+}

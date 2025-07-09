@@ -1,0 +1,20 @@
+.prompt-wrapper {
+    width: 100%;
+}
+
+.prompt-wrapper-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.prompt-reloader {
+    border: none;
+    margin-bottom: 5px;
+
+    transition: all ease-out 150ms;
+}
+
+.prompt-reloader:hover {
+    transform: scale(1.1);
+}

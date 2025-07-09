@@ -1,0 +1,44 @@
+.paginator-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    padding: 20px;
+}
+
+.paginator-toggle {
+    border: none;
+    opacity: 0.8;
+
+    transition: all ease-out 200ms;
+}
+
+.paginator-toggle:hover {
+    opacity: 1;
+}
+
+.paginator-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pagination-pages {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 0.5rem;
+}
+
+.pagination-page-number {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.pagination-page-number.active {
+    font-weight: bold;
+    text-decoration: underline;
+}

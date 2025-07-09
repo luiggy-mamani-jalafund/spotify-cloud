@@ -1,0 +1,7 @@
+.in-mouse-animation {
+    transition: all ease-out 200ms;
+}
+
+.in-mouse-animation:hover {
+    transform: scale(1.2);
+}

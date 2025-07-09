@@ -1,0 +1,28 @@
+:root {
+    /* MAIN COLOR (Spotify green) */
+    --main-color: #1db954;
+
+    --main-color-opacity: rgba(29, 185, 84, 0.3);
+    --main-color-opacity-second: rgba(29, 185, 84, 0.15);
+
+    /* BACKGROUNDS */
+    --bg: #121212;
+    --bg-second: #181818;
+    --bg-third: #282828;
+
+    /* STROKE */
+    --stroke: #3e3e3e;
+    --stroke-second: #000000;
+
+    /* TEXT */
+    --text: #ffffff;
+    --text-placeholder: #b3b3b3;
+
+    /* STATUS */
+    --error: #ff6b6b;
+    --success: #1db954;
+
+    /* LOADERS */
+    --loader-corner: #2a2a2a;
+    --loader-middle: #404040;
+}

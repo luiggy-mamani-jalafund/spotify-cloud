@@ -1,0 +1,27 @@
+.error-message-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+}
+
+.error-message-wrapper svg {
+    color: var(--error);
+    vertical-align: middle;
+}
+
+.error-message {
+    color: var(--error);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.error-message,
+.icon {
+    line-height: 1;
+}
+
+.text-field-error {
+    font-size: 18px;
+    color: var(--error);
+}

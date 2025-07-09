@@ -1,0 +1,125 @@
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th {
+    border-top: 1px solid var(--stroke);
+    border-bottom: 1px solid var(--stroke);
+    padding: 14px 0;
+    text-align: center;
+}
+
+.report-row {
+    border-top: 1px solid var(--stroke);
+    border-bottom: 1px solid var(--stroke);
+}
+
+/* .report-row:nth-child(even) {
+    background-color: var(--bg-third);
+}
+
+.report-row:hover {
+    background-color: var(--bg-second);
+} */
+
+.cell-year {
+    color: var(--inm);
+}
+
+.cell-year[data-type="INM"] {
+    color: var(--inm);
+}
+
+.cell-year[data-type="CONST"] {
+    color: var(--const);
+}
+
+.cell-year[data-type="VEH"] {
+    color: var(--veh);
+}
+
+.cell-type {
+    text-align: center;
+    padding: 4px;
+}
+
+.cell-type-item {
+    --type-color: var(--inm);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 90%;
+
+    border: 2px solid var(--type-color);
+    color: var(--type-color) !important;
+    border-radius: 10px;
+}
+
+.cell-type-item[data-type="INM"] {
+    --type-color: var(--inm);
+}
+
+.cell-type-item[data-type="CONST"] {
+    --type-color: var(--const);
+}
+
+.cell-type-item[data-type="VEH"] {
+    --type-color: var(--veh);
+}
+
+.cell-jurisdiction {
+    text-align: center;
+}
+
+.cell-jurisdiction-item {
+    color: var(--success);
+    border: 2px solid var(--success);
+    border-radius: 10px;
+    padding: 0 10px;
+}
+
+.cell-jurisdiction-item[data-injurisdiction="false"] {
+    color: var(--error);
+    border: 2px solid var(--error);
+}
+
+.cell-button {
+    border-top: 1px solid var(--stroke);
+    border-bottom: 1px solid var(--stroke);
+    padding: 10px 4px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.cell-button:hover .icon {
+    transform: scale(1.2);
+}
+
+.cell-button:hover .icon > svg {
+    color: var(--error) !important;
+    fill: var(--error) !important;
+}
+
+.cell-year,
+.cell-number,
+.cell-clients,
+.cell-natural,
+.cell-juridical,
+.cell-bolivian,
+.cell-foreign,
+.cell-beneficiary,
+.cell-unipersonal,
+.cell-srl {
+    border-top: 1px solid var(--stroke);
+    border-bottom: 1px solid var(--stroke);
+    padding: 10px 4px;
+    text-align: center;
+}

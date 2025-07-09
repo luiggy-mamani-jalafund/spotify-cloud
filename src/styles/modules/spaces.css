@@ -1,0 +1,100 @@
+.margin-top-5 {
+    margin-top: 0.277777778rem;
+}
+
+.margin-top-10 {
+    margin-top: 0.555555556rem;
+}
+
+.margin-top-15 {
+    margin-top: 0.833333333rem;
+}
+
+.margin-top-20 {
+    margin-top: 1.111111111rem;
+}
+
+.margin-top-25 {
+    margin-top: 1.388888889rem;
+}
+
+.margin-top-35 {
+    margin-top: 35px;
+}
+
+.margin-top-50 {
+    margin-top: 2.777777778rem;
+}
+
+.margin-top-70 {
+    margin-top: 3.888888889rem;
+}
+
+.margin-bottom-5 {
+    margin-bottom: 0.277777778rem;
+}
+
+.margin-bottom-15 {
+    margin-bottom: 0.833333333rem;
+}
+
+.margin-bottom-25 {
+    margin-bottom: 1.388888889rem;
+}
+
+.margin-bottom-50 {
+    margin-bottom: 2.777777778rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.z-index-1 {
+    z-index: 1;
+}
+
+.z-index-2 {
+    z-index: 2;
+}
+
+.z-index-3 {
+    z-index: 3;
+}
+
+.z-index-4 {
+    z-index: 4;
+}
+
+.z-index-5 {
+    z-index: 5;
+}
+
+.z-index-6 {
+    z-index: 6;
+}
+
+.z-index-7 {
+    z-index: 7;
+}
+
+.z-index-8 {
+    z-index: 8;
+}
+
+.max-width-50 {
+    max-width: 50%;
+}
+
+.max-width-75 {
+    max-width: 75%;
+}
+
+.max-width-80 {
+    max-width: 80%;
+}
+
+.hidden-by-opacity {
+    opacity: 0;
+    pointer-events: none;
+}

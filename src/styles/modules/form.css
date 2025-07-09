@@ -1,0 +1,17 @@
+.form-main-wrapper {
+    padding: 60px 64px;
+
+    border-radius: var(--corner-lv3);
+    background-color: var(--bg);
+    border: 1px solid var(--stroke);
+}
+
+.form-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-wrapper > button {
+    margin-top: 26px;
+}

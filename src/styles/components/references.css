@@ -1,0 +1,9 @@
+.references-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    padding: 40px 0 40px 40px;
+    margin: 20px;
+    border-left: 1px solid var(--stroke);
+}

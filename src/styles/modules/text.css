@@ -1,0 +1,109 @@
+.font {
+    color: var(--text);
+}
+
+.font-white {
+    color: var(--bg);
+}
+
+.font-call {
+    color: var(--main-color);
+}
+
+.font-h1 {
+    font-size: 52px;
+    line-height: 46px;
+    font-weight: 300;
+}
+
+.font-h2 {
+    font-size: 41px;
+    line-height: 34px;
+}
+
+.font-h3 {
+    font-size: 32px;
+}
+
+.font-h4 {
+    font-size: 25px;
+}
+
+.paragraph {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.notes-lv1 {
+    font-size: 18px;
+}
+
+.notes-lv2 {
+    font-size: 17px;
+}
+
+.extra-bold {
+    font-weight: 900;
+}
+
+.bold {
+    font-weight: 700;
+}
+
+.semi-bold {
+    font-weight: 600;
+}
+
+.normal {
+    font-weight: 500;
+}
+
+.light {
+    font-weight: 300;
+}
+
+.extra-light {
+    font-weight: 100;
+}
+
+.center {
+    text-align: center;
+    margin-inline: auto;
+}
+
+.left {
+    text-align: left;
+}
+
+.right {
+    text-align: right;
+}
+
+.font.main-color {
+    color: var(--main-color);
+}
+
+.font.placeholder {
+    color: var(--text-placeholder);
+}
+
+.font.error {
+    color: var(--error);
+}
+
+.font.justified {
+    text-align: justify !important;
+    width: 400px;
+    line-height: 1.6;
+    hyphens: auto;
+    text-justify: inter-word;
+}
+
+.font-hover {
+    transition: all ease-out 150ms;
+    cursor: pointer;
+}
+
+.font-hover.scale-hover:hover {
+    transform: scale(1.02);
+}

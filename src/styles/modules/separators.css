@@ -1,0 +1,16 @@
+.separator-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+}
+
+.separator {
+    min-width: 50px;
+    height: 1px;
+
+    background-color: var(--text);
+}
+
+.separator.separator-border {
+    background-color: var(--stroke-second);
+}

@@ -8,7 +8,7 @@
     min-width: 50px;
     height: 1px;
 
-    background-color: var(--text);
+    background-color: var(--stroke);
 }
 
 .separator.separator-border {

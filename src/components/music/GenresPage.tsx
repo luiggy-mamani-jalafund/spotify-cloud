@@ -8,6 +8,10 @@ import { UserRole } from "@/models/AppUser";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import "@/styles/components/genres.css";
+import Plus from "@/icons/Plus";
+import Pen from "@/icons/Pen";
+import Trash from "@/icons/Trash";
 
 export default function GenresPage() {
     const { appUser, appUserLoading, userLoading } = useAppUser();
@@ -120,27 +124,24 @@ export default function GenresPage() {
     };
 
     return (
-        <div className="min-h-screen bg-black text-white p-6">
+        <div className="genre-wrapper">
             <div className="max-w-7xl mx-auto">
-                <h2 className="text-3xl font-bold text-green-500 mb-8">
-                    Géneros Musicales
-                </h2>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-
                 {appUser?.role === UserRole.ADMIN_USER && (
                     <button
                         onClick={() => setIsAddDialogOpen(true)}
-                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md mb-6"
+                        className="icon-button"
                     >
-                        Agregar Género
+                        <span className="icon | icon-text-color">
+                            <Plus />
+                        </span>
                     </button>
                 )}
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div className="genres-wrapper">
                     {genres.map((genre) => (
                         <div
                             key={genre.id}
-                            className="bg-[#121212] rounded-lg overflow-hidden shadow-lg group"
+                            className="genre-item"
                             style={{
                                 backgroundColor: genre.color || "#121212",
                             }}
@@ -149,63 +150,50 @@ export default function GenresPage() {
                                 <img
                                     src={genre.imageUrl}
                                     alt={genre.name}
-                                    className="w-full h-32 object-cover"
+                                    className="genre-item-img"
                                 />
                             )}
-                            <div className="p-4">
-                                <h4 className="text-lg font-semibold line-clamp-1">
-                                    {genre.name}
-                                </h4>
-                                <p className="text-gray-400 text-sm line-clamp-2">
-                                    {genre.description}
-                                </p>
-                                <p className="text-gray-500 text-xs mt-1">
-                                    Creado:{" "}
-                                    {new Date(
-                                        genre.createdAt,
-                                    ).toLocaleDateString()}
-                                </p>
-                                <div className="mt-4 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <Link
-                                        href={`/music/genres/${genre.id}`}
-                                        className="text-green-500 hover:underline"
+                            <h4 className="genre-item-title">{genre.name}</h4>
+                            <Link
+                                href={`/music/genres/${genre.id}`}
+                                className="notes-lv2"
+                            >
+                                Ver mas
+                            </Link>
+                            {appUser?.role === UserRole.ADMIN_USER && (
+                                <div className="genre-options">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedGenre(genre);
+                                            setNewGenre({
+                                                name: genre.name,
+                                                description: genre.description,
+                                                color: genre.color || "",
+                                                image: null,
+                                            });
+                                            setIsEditDialogOpen(true);
+                                        }}
+                                        className="option-button notes-lv2"
                                     >
-                                        More
-                                    </Link>
-                                    {appUser?.role === UserRole.ADMIN_USER && (
-                                        <>
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedGenre(genre);
-                                                    setNewGenre({
-                                                        name: genre.name,
-                                                        description:
-                                                            genre.description,
-                                                        color:
-                                                            genre.color || "",
-                                                        image: null,
-                                                    });
-                                                    setIsEditDialogOpen(true);
-                                                }}
-                                                className="text-green-500 hover:underline"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() =>
-                                                    handleDeleteGenre(
-                                                        genre.id!,
-                                                        genre.imageUrl,
-                                                    )
-                                                }
-                                                className="text-red-500 hover:underline"
-                                            >
-                                                Delete
-                                            </button>
-                                        </>
-                                    )}
+                                        <span className="icon | icon-sm icon-hover icon-text-color">
+                                            <Pen />
+                                        </span>
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            handleDeleteGenre(
+                                                genre.id!,
+                                                genre.imageUrl,
+                                            )
+                                        }
+                                        className="option-button notes-lv2"
+                                    >
+                                        <span className="icon | icon-sm icon-hover icon-text-color">
+                                            <Trash />
+                                        </span>
+                                    </button>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     ))}
                 </div>

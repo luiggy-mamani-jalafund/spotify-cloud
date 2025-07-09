@@ -6,6 +6,15 @@
     transition: all ease-out 200ms;
 }
 
+.icon.icon-hover {
+    opacity: 0.6;
+}
+
+.icon.icon-hover:hover {
+    opacity: 1; 
+    transform: scale(1.2);
+}
+
 .icon.square {
     padding: 6px;
     border-radius: 10px;

@@ -3,3 +3,24 @@
     border: none;
     text-align: left;    
 }
+
+.icon-button {
+    position: fixed;
+    bottom: 20px;
+    right: 180px;
+    border: none;
+    background-color: var(--main-color);
+    padding: 10px 14px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    transition: all ease-out 200ms;
+}
+
+.icon-button:hover {
+    transform: scale(1.1);
+}
+
+.option-button {
+    border: none;
+    color: var(--text);
+}

@@ -1,142 +1,52 @@
-.loader-message-wrapper {
-    display: inline-flex;
-    gap: 10px;
+.page-loader {
+    display: flex;
     align-items: center;
-
-    padding: 20px 20px 20px 0;
-}
-
-.loader-message-wrapper.as-page {
-    min-height: 100vh;
-    width: 100%;
-
     justify-content: center;
-}
-
-.loader-text {
-    animation: pulse-opacity 1.5s ease-in-out infinite;
-    opacity: 0.4;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: var(--bg);
 }
 
 .loader {
-    --loader-scale: 0.7;
-    --loader-size: calc(50px * var(--loader-scale));
-    --loader-ball-size: calc(20px * var(--loader-scale));
-    --loader-gap: calc(10px * var(--loader-scale));
-    --loader-shadow-offset: calc(30px * var(--loader-scale));
-    --loader-translate: calc(15px * var(--loader-scale));
-    --loader-margin-top: calc(-20px * var(--loader-scale));
-    --loader-speed: 900ms;
-
-    --loader-color: #000;
-
-    animation: rotate var(--loader-speed) infinite;
-    height: var(--loader-size);
-    width: var(--loader-size);
-}
-
-.loader.loader-lg {
-    --loader-scale: 1;
-}
-
-.loader.loader-md {
-    --loader-scale: 0.7;
-}
-
-.loader.loader-sm {
-    --loader-scale: 0.6;
-}
-
-.loader.loader-main-color {
-    --loader-color: #b2a06c;
-}
-
-.loader:before,
-.loader:after {
-    border-radius: 50%;
-    content: "";
+    width: 8px;
+    height: 40px;
+    border-radius: 4px;
     display: block;
-    height: var(--loader-ball-size);
-    width: var(--loader-ball-size);
-}
-.loader:before {
-    animation: ball1 var(--loader-speed) infinite;
-    background-color: var(--loader-color);
-    box-shadow: var(--loader-shadow-offset) 0 0 var(--loader-color);
-    margin-bottom: var(--loader-gap);
-}
-.loader:after {
-    animation: ball2 var(--loader-speed) infinite;
-    background-color: var(--loader-color);
-    box-shadow: var(--loader-shadow-offset) 0 0 var(--loader-color);
+    margin: 20px auto;
+    position: relative;
+    background: currentColor;
+    color: var(--main-color);
+    box-sizing: border-box;
+    animation: animloader 0.3s 0.3s linear infinite alternate;
 }
 
-.page-loader {
-    width: 40px;
-    aspect-ratio: 1;
-    --_g: no-repeat radial-gradient(farthest-side, #000 94%, #0000);
-    background: var(--_g) 0 0, var(--_g) 100% 0, var(--_g) 100% 100%,
-        var(--_g) 0 100%;
-    background-size: 40% 40%;
-    animation: l38 0.4s infinite;
+.loader::after,
+.loader::before {
+    content: "";
+    width: 8px;
+    height: 40px;
+    border-radius: 4px;
+    background: currentColor;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 20px;
+    box-sizing: border-box;
+    animation: animloader 0.3s 0.45s linear infinite alternate;
+}
+.loader::before {
+    left: -20px;
+    animation-delay: 0s;
 }
 
-@keyframes l38 {
-    100% {
-        background-position: 100% 0, 100% 100%, 0 100%, 0 0;
-    }
-}
-
-@keyframes rotate {
+@keyframes animloader {
     0% {
-        transform: rotate(0deg) scale(0.8);
-    }
-    50% {
-        transform: rotate(360deg) scale(1.2);
+        height: 48px;
     }
     100% {
-        transform: rotate(720deg) scale(0.8);
-    }
-}
-
-@keyframes ball1 {
-    0% {
-        box-shadow: var(--loader-shadow-offset) 0 0 var(--bg-second-dark);
-    }
-    50% {
-        box-shadow: 0 0 0 var(--bg-second-dark);
-        margin-bottom: 0;
-        transform: translate(var(--loader-translate), var(--loader-translate));
-    }
-    100% {
-        box-shadow: var(--loader-shadow-offset) 0 0 var(--bg-second-dark);
-        margin-bottom: var(--loader-gap);
-    }
-}
-
-@keyframes ball2 {
-    0% {
-        box-shadow: var(--loader-shadow-offset) 0 0 var(--text);
-    }
-    50% {
-        box-shadow: 0 0 0 var(--text);
-        margin-top: var(--loader-margin-top);
-        transform: translate(var(--loader-translate), var(--loader-translate));
-    }
-    100% {
-        box-shadow: var(--loader-shadow-offset) 0 0 var(--text);
-        margin-top: 0;
-    }
-}
-
-@keyframes pulse-opacity {
-    0% {
-        opacity: 0.4;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0.4;
+        height: 4px;
     }
 }

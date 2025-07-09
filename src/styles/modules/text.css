@@ -11,9 +11,9 @@
 }
 
 .font-h1 {
-    font-size: 52px;
-    line-height: 46px;
-    font-weight: 300;
+    font-size: 64px;
+    font-weight: 900;
+    margin: 0;
 }
 
 .font-h2 {

@@ -15,7 +15,6 @@ import "@/styles/components/artists.css";
 import "@/styles/modules/form.css";
 import Plus from "@/icons/Plus";
 import Pen from "@/icons/Pen";
-import Music from "@/icons/Music";
 import Trash from "@/icons/Trash";
 import Spotify from "@/icons/Spotify";
 
@@ -235,9 +234,8 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                     </div>
                 </div>
 
-                <div className="separator | margin-top-50 margin-bottom-50"></div>
+                <div className="separator | margin-top-15 margin-bottom-15"></div>
                 <div className="separator-wrapper">
-                    <h3 className="font-h3">Artistas</h3>
                     {appUser?.role === UserRole.ADMIN_USER && (
                         <button
                             onClick={() => setIsAddArtistDialogOpen(true)}

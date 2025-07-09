@@ -1,5 +1,5 @@
 .artist-wrappper {
-    padding: 0 300px;
+    padding: 0 40px;
 }
 
 .artist-genrer-wrappper {
@@ -10,7 +10,7 @@
 }
 
 .artist-genrer-img {
-    --size: 500px;
+    --size: 300px;
     height: var(--size);
     width: var(--size);
     aspect-ratio: 1;
@@ -78,7 +78,4 @@ border-radius: 4px;
     bottom: 12px;
     left: 12px;
     width: 90%;
-}
-
-.artist-item-title {
 }

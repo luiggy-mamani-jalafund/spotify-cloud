@@ -5,6 +5,7 @@
     width: 100%;
     max-width: 28rem;
     box-sizing: border-box;
+    border: 1px solid var(--stroke);
 }
 
 .form-title {
@@ -21,14 +22,14 @@
 }
 
 .form-input {
-    background-color: var(--bg-second);
+    background-color: var(--bg);
     color: var(--text);
-    border: 1px solid var(--stroke);
+    border: 1px solid #222;
     border-radius: 0.375rem;
     padding: 14px 18px;
     width: 100%;
     box-sizing: border-box;
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .form-color {

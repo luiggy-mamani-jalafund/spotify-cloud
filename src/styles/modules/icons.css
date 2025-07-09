@@ -17,7 +17,7 @@
 
 .icon.square {
     padding: 6px;
-    border-radius: 10px;
+border-radius: 4px;
 
     background-color: var(--bg);
     border: 2px solid var(--text);

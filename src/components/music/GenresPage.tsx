@@ -9,13 +9,17 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import "@/styles/components/genres.css";
+import "@/styles/modules/modal.css";
+import "@/styles/modules/form.css";
 import Plus from "@/icons/Plus";
 import Pen from "@/icons/Pen";
 import Trash from "@/icons/Trash";
+import PageLoader from "../navigation/PageLoader";
+import Spotify from "@/icons/Spotify";
 
 export default function GenresPage() {
     const { appUser, appUserLoading, userLoading } = useAppUser();
-    const [genres, setGenres] = useState<MusicGenre[]>([]);
+    const [genres, setGenres] = useState<MusicGenre[] | undefined>(undefined);
     const [newGenre, setNewGenre] = useState({
         name: "",
         description: "",
@@ -48,7 +52,7 @@ export default function GenresPage() {
 
     const handleAddGenre = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (appUser?.role !== UserRole.ADMIN_USER) return;
+        if (appUser?.role !== UserRole.ADMIN_USER || !genres) return;
         try {
             const addedGenre = await toast.promise(
                 genreRepo.addGenre(
@@ -76,7 +80,8 @@ export default function GenresPage() {
 
     const handleUpdateGenre = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (appUser?.role !== UserRole.ADMIN_USER || !selectedGenre) return;
+        if (appUser?.role !== UserRole.ADMIN_USER || !selectedGenre || !genres)
+            return;
         try {
             const updatedGenre: Partial<MusicGenre> = {
                 name: newGenre.name || selectedGenre.name,
@@ -110,7 +115,7 @@ export default function GenresPage() {
     };
 
     const handleDeleteGenre = async (id: string, imageUrl?: string) => {
-        if (appUser?.role !== UserRole.ADMIN_USER) return;
+        if (appUser?.role !== UserRole.ADMIN_USER || !genres) return;
         try {
             await toast.promise(genreRepo.deleteGenre(id, imageUrl), {
                 loading: "Eliminando género...",
@@ -123,16 +128,23 @@ export default function GenresPage() {
         }
     };
 
+    if (!appUser || !genres) {
+        return <PageLoader />;
+    }
+
     return (
         <div className="genre-wrapper">
             <div className="max-w-7xl mx-auto">
                 {appUser?.role === UserRole.ADMIN_USER && (
                     <button
                         onClick={() => setIsAddDialogOpen(true)}
-                        className="icon-button"
+                        className="icon-button | margin-bottom-25"
                     >
-                        <span className="icon | icon-text-color">
+                        <span className="icon | icon-sm icon-placeholder-color">
                             <Plus />
+                        </span>
+                        <span className="font notes-lv1 placeholder">
+                            create
                         </span>
                     </button>
                 )}
@@ -156,9 +168,11 @@ export default function GenresPage() {
                             <h4 className="genre-item-title">{genre.name}</h4>
                             <Link
                                 href={`/music/genres/${genre.id}`}
-                                className="notes-lv2"
+                                className="notes-lv2 genre-item-title-more"
                             >
-                                Ver mas
+                                <span className="icon | icon-lg icon-text-color">
+                                    <Spotify />
+                                </span>
                             </Link>
                             {appUser?.role === UserRole.ADMIN_USER && (
                                 <div className="genre-options">
@@ -198,20 +212,17 @@ export default function GenresPage() {
                     ))}
                 </div>
 
-                {/* Add Genre Dialog */}
                 {isAddDialogOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-[#121212] p-6 rounded-lg w-full max-w-md">
-                            <h3 className="text-xl font-bold text-white mb-4">
-                                Agregar Género
-                            </h3>
+                    <div className="overall | child-center">
+                        <div className="form-container">
+                            <h3 className="form-title">Create new genre</h3>
                             <form
                                 onSubmit={handleAddGenre}
-                                className="space-y-4"
+                                className="form-body"
                             >
                                 <input
                                     type="text"
-                                    placeholder="Nombre del género"
+                                    placeholder="Enter the name of the genre"
                                     value={newGenre.name}
                                     onChange={(e) =>
                                         setNewGenre({
@@ -219,12 +230,12 @@ export default function GenresPage() {
                                             name: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
+                                    className="form-input"
                                     required
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Descripción"
+                                    placeholder="Enter the description of the genre"
                                     value={newGenre.description}
                                     onChange={(e) =>
                                         setNewGenre({
@@ -232,7 +243,7 @@ export default function GenresPage() {
                                             description: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
+                                    className="form-input"
                                     required
                                 />
                                 <input
@@ -244,7 +255,7 @@ export default function GenresPage() {
                                             color: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-16 h-10"
+                                    className="form-color"
                                 />
                                 <input
                                     type="file"
@@ -255,23 +266,23 @@ export default function GenresPage() {
                                             image: e.target.files?.[0] || null,
                                         })
                                     }
-                                    className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
+                                    className="form-input"
                                 />
-                                <div className="flex justify-end space-x-2">
+                                <div className="form-actions">
                                     <button
                                         type="button"
                                         onClick={() =>
                                             setIsAddDialogOpen(false)
                                         }
-                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                        className="btn-cancel"
                                     >
-                                        Cancelar
+                                        Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                        className="btn-submit"
                                     >
-                                        Agregar
+                                        Create
                                     </button>
                                 </div>
                             </form>
@@ -279,16 +290,13 @@ export default function GenresPage() {
                     </div>
                 )}
 
-                {/* Edit Genre Dialog */}
                 {isEditDialogOpen && selectedGenre && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-[#121212] p-6 rounded-lg w-full max-w-md">
-                            <h3 className="text-xl font-bold text-white mb-4">
-                                Editar Género
-                            </h3>
+                    <div className="overall | child-center">
+                        <div className="form-container">
+                            <h3 className="form-title">Editar Género</h3>
                             <form
                                 onSubmit={handleUpdateGenre}
-                                className="space-y-4"
+                                className="form-body"
                             >
                                 <input
                                     type="text"
@@ -300,7 +308,7 @@ export default function GenresPage() {
                                             name: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
+                                    className="form-input"
                                 />
                                 <input
                                     type="text"
@@ -312,7 +320,7 @@ export default function GenresPage() {
                                             description: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
+                                    className="form-input"
                                 />
                                 <input
                                     type="color"
@@ -323,7 +331,7 @@ export default function GenresPage() {
                                             color: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-16 h-10"
+                                    className="form-color"
                                 />
                                 <input
                                     type="file"
@@ -334,21 +342,21 @@ export default function GenresPage() {
                                             image: e.target.files?.[0] || null,
                                         })
                                     }
-                                    className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
+                                    className="form-input"
                                 />
-                                <div className="flex justify-end space-x-2">
+                                <div className="form-actions">
                                     <button
                                         type="button"
                                         onClick={() =>
                                             setIsEditDialogOpen(false)
                                         }
-                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                        className="btn-cancel"
                                     >
                                         Cancelar
                                     </button>
                                     <button
                                         type="submit"
-                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                        className="btn-submit"
                                     >
                                         Guardar
                                     </button>

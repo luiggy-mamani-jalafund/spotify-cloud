@@ -3,8 +3,7 @@
     align-items: center;
     justify-content: space-between;
 
-    padding: 40px 180px;
-
+    padding: 40px 300px;
 }
 
 .side-nav-profile-wrapper {
@@ -42,6 +41,6 @@
     width: 280px;
 
     background-color: var(--bg-second);
-    border-radius: 5px;
+    border-radius: 4px;
     border: 1px solid var(--stroke);
 }

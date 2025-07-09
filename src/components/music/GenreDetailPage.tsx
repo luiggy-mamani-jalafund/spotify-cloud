@@ -9,11 +9,20 @@ import { UserRole } from "@/models/AppUser";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import PageLoader from "../navigation/PageLoader";
+import "@/styles/modules/modal.css";
+import "@/styles/components/artists.css";
+import "@/styles/modules/form.css";
+import Plus from "@/icons/Plus";
+import Pen from "@/icons/Pen";
+import Music from "@/icons/Music";
+import Trash from "@/icons/Trash";
+import Spotify from "@/icons/Spotify";
 
 export default function GenreDetailPage({ genreId }: { genreId: string }) {
     const { appUser, appUserLoading, userLoading } = useAppUser();
     const [genre, setGenre] = useState<MusicGenre | null>(null);
-    const [artists, setArtists] = useState<Artist[]>([]);
+    const [artists, setArtists] = useState<Artist[] | undefined>(undefined);
     const [newArtist, setNewArtist] = useState({
         name: "",
         country: "",
@@ -59,7 +68,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
 
     const handleAddArtist = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (appUser?.role !== UserRole.ADMIN_USER) return;
+        if (appUser?.role !== UserRole.ADMIN_USER || !artists) return;
         try {
             const artist: Artist = {
                 bio: newArtist.bio,
@@ -122,23 +131,14 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
         }
     };
 
-    const handleDeleteGenre = async (id: string, imageUrl?: string) => {
-        if (appUser?.role !== UserRole.ADMIN_USER) return;
-        try {
-            await toast.promise(genreRepo.deleteGenre(id, imageUrl), {
-                loading: "Eliminando género...",
-                success: "Género eliminado",
-                error: "Error al eliminar género",
-            });
-            router.push("/genres");
-        } catch (err) {
-            setError("Error al eliminar género.");
-        }
-    };
-
     const handleUpdateArtist = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (appUser?.role !== UserRole.ADMIN_USER || !selectedArtist) return;
+        if (
+            appUser?.role !== UserRole.ADMIN_USER ||
+            !selectedArtist ||
+            !artists
+        )
+            return;
         try {
             const updatedArtist = {
                 name: newArtist.name || selectedArtist.name,
@@ -176,7 +176,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
     };
 
     const handleDeleteArtist = async (id: string, imageUrl?: string) => {
-        if (appUser?.role !== UserRole.ADMIN_USER) return;
+        if (appUser?.role !== UserRole.ADMIN_USER || !artists) return;
         try {
             await toast.promise(artistRepo.deleteArtist(id, imageUrl), {
                 loading: "Eliminando artista...",
@@ -189,145 +189,138 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
         }
     };
 
-    if (!genre) {
-        return (
-            <div className="min-h-screen bg-gray-900 flex items-center justify-center text-green-400">
-                Cargando...
-            </div>
-        );
+    if (!appUser || !genre || !artists) {
+        return <PageLoader />;
     }
 
     return (
-        <div className="min-h-screen bg-gray-900 p-6">
-            <div className="max-w-7xl mx-auto">
-                <h2 className="text-3xl font-bold text-green-400 mb-8">
-                    {genre.name}
-                </h2>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-                <div className="bg-gray-800 p-6 rounded-lg mb-8">
+        <div className="artist-wrappper">
+            <div className="">
+                <div className="artist-genrer-wrappper">
                     {genre.imageUrl && (
                         <img
                             src={genre.imageUrl}
                             alt={genre.name}
-                            className="w-full max-w-xs h-48 object-cover rounded-md mb-4"
+                            className="artist-genrer-img"
                         />
                     )}
-                    <p className="text-gray-400">{genre.description}</p>
-                    <p className="text-gray-500 text-sm">
-                        Creado: {new Date(genre.createdAt).toLocaleDateString()}
-                    </p>
+                    <div className="artist-genrer-wrappper-info">
+                        <h2 className="font-h1">{genre.name}</h2>
+
+                        <p className="paragraph">{genre.description}</p>
+                        <p className="font notes-lv1 | placeholder">
+                            {genre.createdAt.toString()}
+                        </p>
+                        {appUser?.role === UserRole.ADMIN_USER && (
+                            <div className="mt-4">
+                                <button
+                                    onClick={() => {
+                                        setSelectedGenre(genre);
+                                        setNewArtist({
+                                            name: genre.name,
+                                            country: "",
+                                            bio: genre.description || "",
+                                            image: null as File | null,
+                                        });
+                                        setIsEditGenreDialogOpen(true);
+                                    }}
+                                    className="icon-button"
+                                >
+                                    <span className="icon | icon-placeholder-color">
+                                        <Pen />
+                                    </span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="separator | margin-top-50 margin-bottom-50"></div>
+                <div className="separator-wrapper">
+                    <h3 className="font-h3">Artistas</h3>
                     {appUser?.role === UserRole.ADMIN_USER && (
-                        <div className="mt-4">
-                            <button
-                                onClick={() => {
-                                    setSelectedGenre(genre);
-                                    setNewArtist({
-                                        name: genre.name,
-                                        country: "",
-                                        bio: genre.description || "",
-                                        image: null as File | null,
-                                    });
-                                    setIsEditGenreDialogOpen(true);
-                                }}
-                                className="text-green-400 hover:underline mr-2"
-                            >
-                                Editar Género
-                            </button>
-                            <button
-                                onClick={() =>
-                                    handleDeleteGenre(genre.id!, genre.imageUrl)
-                                }
-                                className="text-red-400 hover:underline"
-                            >
-                                Eliminar Género
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => setIsAddArtistDialogOpen(true)}
+                            className="icon-button"
+                        >
+                            <span className="icon | icon-placeholder-color">
+                                <Plus />
+                            </span>
+                        </button>
                     )}
                 </div>
 
-                <h3 className="text-2xl font-semibold text-green-400 mb-4">
-                    Artistas
-                </h3>
-                {appUser?.role === UserRole.ADMIN_USER && (
-                    <button
-                        onClick={() => setIsAddArtistDialogOpen(true)}
-                        className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 mb-6"
-                    >
-                        Agregar Artista
-                    </button>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="artists-wrapper">
                     {artists.map((artist, index) => (
                         <div
                             key={`artist-item-${index}`}
-                            className="bg-gray-800 p-4 rounded-lg"
+                            className="artists-single-item"
                         >
                             {artist.imageUrl && (
                                 <img
                                     src={artist.imageUrl}
                                     alt={artist.name}
-                                    className="w-full h-40 object-cover rounded-md mb-4"
+                                    className="artists-item-img"
                                 />
                             )}
-                            <h4 className="text-lg font-semibold text-white">
-                                {artist.name}
-                            </h4>
-                            <p className="text-gray-400">
-                                País: {artist.country}
-                            </p>
-                            <p className="text-gray-400">{artist.bio}</p>
-                            <div className="mt-2">
-                                <Link
-                                    href={`/music/genres/${genreId}/${artist.id}`}
-                                    className="text-green-400 hover:underline mr-2"
-                                >
-                                    Ver Canciones
-                                </Link>
-                                {appUser?.role === UserRole.ADMIN_USER && (
-                                    <>
-                                        <button
-                                            onClick={() => {
-                                                setSelectedArtist(artist);
-                                                setNewArtist({
-                                                    name: artist.name,
-                                                    country: artist.country,
-                                                    bio: artist.bio,
-                                                    image: null as File | null,
-                                                });
-                                                setIsEditArtistDialogOpen(true);
-                                            }}
-                                            className="text-green-400 hover:underline mr-2"
-                                        >
-                                            Editar
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                handleDeleteArtist(
-                                                    artist.id!,
-                                                    artist.imageUrl,
-                                                )
-                                            }
-                                            className="text-red-400 hover:underline"
-                                        >
-                                            Eliminar
-                                        </button>
-                                    </>
-                                )}
+                            <Link
+                                href={`/music/genres/${genreId}/${artist.id}`}
+                                className="artists-item-foote-songs"
+                            >
+                                <span className="icon icon-md icon-text-color">
+                                    <Spotify />
+                                </span>
+                            </Link>
+                            {appUser?.role === UserRole.ADMIN_USER && (
+                                <div className="artists-item-options">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedArtist(artist);
+                                            setNewArtist({
+                                                name: artist.name,
+                                                country: artist.country,
+                                                bio: artist.bio,
+                                                image: null as File | null,
+                                            });
+                                            setIsEditArtistDialogOpen(true);
+                                        }}
+                                        className="option-button notes-lv2"
+                                    >
+                                        <span className="icon | icon-sm icon-hover icon-text-color">
+                                            <Pen />
+                                        </span>
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            handleDeleteArtist(
+                                                artist.id!,
+                                                artist.imageUrl,
+                                            )
+                                        }
+                                        className="option-button notes-lv2"
+                                    >
+                                        <span className="icon | icon-sm icon-hover icon-text-color">
+                                            <Trash />
+                                        </span>
+                                    </button>
+                                </div>
+                            )}
+                            <div className="artist-item-main-footer">
+                                <h4 className="font-h3 artist-item-title">
+                                    {artist.name}
+                                </h4>
                             </div>
                         </div>
                     ))}
                 </div>
 
                 {isAddArtistDialogOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
-                            <h3 className="text-xl font-bold text-white mb-4">
-                                Agregar Artista
-                            </h3>
+                    <div className="overall child-center">
+                        <div className="form-container">
+                            <h3 className="form-title">Agregar Artista</h3>
                             <form
                                 onSubmit={handleAddArtist}
-                                className="space-y-4"
+                                className="form-body"
                             >
                                 <input
                                     type="text"
@@ -339,7 +332,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             name: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                     required
                                 />
                                 <input
@@ -352,7 +345,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             country: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                     required
                                 />
                                 <input
@@ -365,7 +358,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             bio: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                     required
                                 />
                                 <input
@@ -377,21 +370,21 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             image: e.target.files?.[0] || null,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                 />
-                                <div className="flex justify-end space-x-2">
+                                <div className="form-actions">
                                     <button
                                         type="button"
                                         onClick={() =>
                                             setIsAddArtistDialogOpen(false)
                                         }
-                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                        className="btn-cancel"
                                     >
                                         Cancelar
                                     </button>
                                     <button
                                         type="submit"
-                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                        className="btn-submit"
                                     >
                                         Agregar
                                     </button>
@@ -402,14 +395,12 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                 )}
 
                 {isEditGenreDialogOpen && selectedGenre && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
-                            <h3 className="text-xl font-bold text-white mb-4">
-                                Editar Género
-                            </h3>
+                    <div className="overall child-center">
+                        <div className="form-container">
+                            <h3 className="form-title">Editar Género</h3>
                             <form
                                 onSubmit={handleUpdateGenre}
-                                className="space-y-4"
+                                className="form-body"
                             >
                                 <input
                                     type="text"
@@ -421,7 +412,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             name: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                 />
                                 <input
                                     type="text"
@@ -433,7 +424,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             bio: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                 />
                                 <input
                                     type="file"
@@ -444,21 +435,21 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             image: e.target.files?.[0] || null,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                 />
-                                <div className="flex justify-end space-x-2">
+                                <div className="form-actions">
                                     <button
                                         type="button"
                                         onClick={() =>
                                             setIsEditGenreDialogOpen(false)
                                         }
-                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                        className="btn-cancel"
                                     >
                                         Cancelar
                                     </button>
                                     <button
                                         type="submit"
-                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                        className="btn-submit"
                                     >
                                         Guardar
                                     </button>
@@ -469,14 +460,12 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                 )}
 
                 {isEditArtistDialogOpen && selectedArtist && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
-                            <h3 className="text-xl font-bold text-white mb-4">
-                                Editar Artista
-                            </h3>
+                    <div className="overall child-center">
+                        <div className="form-container">
+                            <h3 className="form-title">Editar Artista</h3>
                             <form
                                 onSubmit={handleUpdateArtist}
-                                className="space-y-4"
+                                className="form-body"
                             >
                                 <input
                                     type="text"
@@ -488,7 +477,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             name: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                     required
                                 />
                                 <input
@@ -501,7 +490,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             country: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                     required
                                 />
                                 <input
@@ -514,7 +503,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             bio: e.target.value,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                     required
                                 />
                                 <input
@@ -526,21 +515,21 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                             image: e.target.files?.[0] || null,
                                         })
                                     }
-                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    className="form-input"
                                 />
-                                <div className="flex justify-end space-x-2">
+                                <div className="form-actions">
                                     <button
                                         type="button"
                                         onClick={() =>
                                             setIsEditArtistDialogOpen(false)
                                         }
-                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                        className="btn-cancel"
                                     >
                                         Cancelar
                                     </button>
                                     <button
                                         type="submit"
-                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                        className="btn-submit"
                                     >
                                         Guardar
                                     </button>

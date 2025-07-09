@@ -1,23 +1,24 @@
-.logout-button{
+.logout-button {
     color: var(--text);
     border: none;
-    text-align: left;    
+    text-align: left;
 }
 
 .icon-button {
-    position: fixed;
-    bottom: 20px;
-    right: 180px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     border: none;
-    background-color: var(--main-color);
-    padding: 10px 14px;
-    aspect-ratio: 1;
-    border-radius: 50%;
+
     transition: all ease-out 200ms;
+    padding: 10px 20px;
+    border-radius: 40px;
+    border: 1px solid var(--stroke);
 }
 
 .icon-button:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .option-button {

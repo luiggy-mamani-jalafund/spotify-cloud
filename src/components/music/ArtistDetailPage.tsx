@@ -7,7 +7,6 @@ import { SongRepository } from "@/repositories/SongRepository";
 import { Artist, Song } from "@/models/MusicGenre";
 import { UserRole } from "@/models/AppUser";
 import { useRouter, useParams } from "next/navigation";
-import Image from "next/image";
 import toast from "react-hot-toast";
 
 export default function ArtistDetailPage({ artistId }: { artistId: string }) {
@@ -23,6 +22,11 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
         audio: null as File | null,
     });
     const [error, setError] = useState("");
+    const [isAddSongDialogOpen, setIsAddSongDialogOpen] = useState(false);
+    const [isEditArtistDialogOpen, setIsEditArtistDialogOpen] = useState(false);
+    const [isEditSongDialogOpen, setIsEditSongDialogOpen] = useState(false);
+    const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+    const [selectedSong, setSelectedSong] = useState<Song | null>(null);
     const artistRepo = new ArtistRepository();
     const songRepo = new SongRepository();
     const router = useRouter();
@@ -91,24 +95,26 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                 image: null,
                 audio: null,
             });
+            setIsAddSongDialogOpen(false);
         } catch (err) {
             setError("Error al agregar canción.");
         }
     };
 
-    const handleUpdateArtist = async (id: string, artist: Artist) => {
-        if (appUser?.role !== UserRole.ADMIN_USER) return;
+    const handleUpdateArtist = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (appUser?.role !== UserRole.ADMIN_USER || !selectedArtist) return;
         try {
-            const newName = prompt("Nuevo nombre", artist.name) || artist.name;
-            const newCountry =
-                prompt("Nuevo país", artist.country) || artist.country;
-            const newBio = prompt("Nueva biografía", artist.bio) || artist.bio;
-            const newImage = newSong.image;
+            const updatedArtist = {
+                name: newSong.name || selectedArtist.name,
+                country: selectedArtist.country,
+                bio: newSong.name || selectedArtist.bio,
+            };
             await toast.promise(
                 artistRepo.updateArtist(
-                    id,
-                    { name: newName, country: newCountry, bio: newBio },
-                    newImage,
+                    selectedArtist.id!,
+                    updatedArtist,
+                    newSong.image,
                 ),
                 {
                     loading: "Actualizando artista...",
@@ -116,12 +122,17 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                     error: "Error al actualizar artista",
                 },
             );
-            setArtist({
-                ...artist,
-                name: newName,
-                country: newCountry,
-                bio: newBio,
+            setArtist({ ...selectedArtist, ...updatedArtist });
+            setNewSong({
+                name: "",
+                duration: 0,
+                artistId,
+                genreId: newSong.genreId,
+                image: null,
+                audio: null,
             });
+            setSelectedArtist(null);
+            setIsEditArtistDialogOpen(false);
         } catch (err) {
             setError("Error al actualizar artista.");
         }
@@ -141,25 +152,20 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
         }
     };
 
-    const handleUpdateSong = async (id: string, song: Song) => {
-        if (appUser?.role !== UserRole.ADMIN_USER) return;
+    const handleUpdateSong = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (appUser?.role !== UserRole.ADMIN_USER || !selectedSong) return;
         try {
-            const newName = prompt("Nuevo 이름", song.name) || song.name;
-            const newDuration =
-                parseInt(
-                    prompt(
-                        "Nueva duración (segundos)",
-                        song.duration.toString(),
-                    ) || "0",
-                ) || song.duration;
-            const newImage = newSong.image;
-            const newAudio = newSong.audio;
+            const updatedSong = {
+                name: newSong.name || selectedSong.name,
+                duration: newSong.duration || selectedSong.duration,
+            };
             await toast.promise(
                 songRepo.updateSong(
-                    id,
-                    { name: newName, duration: newDuration },
-                    newImage,
-                    newAudio,
+                    selectedSong.id!,
+                    updatedSong,
+                    newSong.image,
+                    newSong.audio,
                 ),
                 {
                     loading: "Actualizando canción...",
@@ -169,11 +175,19 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             );
             setSongs(
                 songs.map((s) =>
-                    s.id === id
-                        ? { ...s, name: newName, duration: newDuration }
-                        : s,
+                    s.id === selectedSong.id ? { ...s, ...updatedSong } : s,
                 ),
             );
+            setNewSong({
+                name: "",
+                duration: 0,
+                artistId,
+                genreId: newSong.genreId,
+                image: null,
+                audio: null,
+            });
+            setSelectedSong(null);
+            setIsEditSongDialogOpen(false);
         } catch (err) {
             setError("Error al actualizar canción.");
         }
@@ -225,9 +239,18 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                     {appUser?.role === UserRole.ADMIN_USER && (
                         <div className="mt-4">
                             <button
-                                onClick={() =>
-                                    handleUpdateArtist(artist.id!, artist)
-                                }
+                                onClick={() => {
+                                    setSelectedArtist(artist);
+                                    setNewSong({
+                                        name: artist.name,
+                                        duration: 0,
+                                        artistId,
+                                        genreId: artist.genreId || "",
+                                        image: null,
+                                        audio: null,
+                                    });
+                                    setIsEditArtistDialogOpen(true);
+                                }}
                                 className="text-green-400 hover:underline mr-2"
                             >
                                 Editar Artista
@@ -251,59 +274,12 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                     Canciones
                 </h3>
                 {appUser?.role === UserRole.ADMIN_USER && (
-                    <form onSubmit={handleAddSong} className="mb-6 space-y-4">
-                        <input
-                            type="text"
-                            placeholder="Nombre de la canción"
-                            value={newSong.name}
-                            onChange={(e) =>
-                                setNewSong({ ...newSong, name: e.target.value })
-                            }
-                            className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
-                            required
-                        />
-                        <input
-                            type="number"
-                            placeholder="Duración (segundos)"
-                            value={newSong.duration}
-                            onChange={(e) =>
-                                setNewSong({
-                                    ...newSong,
-                                    duration: parseInt(e.target.value),
-                                })
-                            }
-                            className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
-                            required
-                        />
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                                setNewSong({
-                                    ...newSong,
-                                    image: e.target.files?.[0] || null,
-                                })
-                            }
-                            className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
-                        />
-                        <input
-                            type="file"
-                            accept="audio/mp3"
-                            onChange={(e) =>
-                                setNewSong({
-                                    ...newSong,
-                                    audio: e.target.files?.[0] || null,
-                                })
-                            }
-                            className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
-                        />
-                        <button
-                            type="submit"
-                            className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
-                        >
-                            Agregar Canción
-                        </button>
-                    </form>
+                    <button
+                        onClick={() => setIsAddSongDialogOpen(true)}
+                        className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 mb-6"
+                    >
+                        Agregar Canción
+                    </button>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -342,9 +318,18 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                             {appUser?.role === UserRole.ADMIN_USER && (
                                 <div className="mt-2">
                                     <button
-                                        onClick={() =>
-                                            handleUpdateSong(song.id!, song)
-                                        }
+                                        onClick={() => {
+                                            setSelectedSong(song);
+                                            setNewSong({
+                                                name: song.name,
+                                                duration: song.duration,
+                                                artistId,
+                                                genreId: song.genreId,
+                                                image: null,
+                                                audio: null,
+                                            });
+                                            setIsEditSongDialogOpen(true);
+                                        }}
                                         className="text-green-400 hover:underline mr-2"
                                     >
                                         Editar
@@ -366,6 +351,248 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                         </div>
                     ))}
                 </div>
+
+                {isAddSongDialogOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+                            <h3 className="text-xl font-bold text-white mb-4">
+                                Agregar Canción
+                            </h3>
+                            <form
+                                onSubmit={handleAddSong}
+                                className="space-y-4"
+                            >
+                                <input
+                                    type="text"
+                                    placeholder="Nombre de la canción"
+                                    value={newSong.name}
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Duración (segundos)"
+                                    value={newSong.duration}
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            duration: parseInt(e.target.value),
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            image: e.target.files?.[0] || null,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                />
+                                <input
+                                    type="file"
+                                    accept="audio/mp3"
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            audio: e.target.files?.[0] || null,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                />
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setIsAddSongDialogOpen(false)
+                                        }
+                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Agregar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {isEditArtistDialogOpen && selectedArtist && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+                            <h3 className="text-xl font-bold text-white mb-4">
+                                Editar Artista
+                            </h3>
+                            <form
+                                onSubmit={handleUpdateArtist}
+                                className="space-y-4"
+                            >
+                                <input
+                                    type="text"
+                                    placeholder="Nombre del artista"
+                                    value={newSong.name}
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="País"
+                                    value={newSong.name}
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Biografía"
+                                    value={newSong.name}
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            image: e.target.files?.[0] || null,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                />
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setIsEditArtistDialogOpen(false)
+                                        }
+                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Guardar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {isEditSongDialogOpen && selectedSong && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+                            <h3 className="text-xl font-bold text-white mb-4">
+                                Editar Canción
+                            </h3>
+                            <form
+                                onSubmit={handleUpdateSong}
+                                className="space-y-4"
+                            >
+                                <input
+                                    type="text"
+                                    placeholder="Nombre de la canción"
+                                    value={newSong.name}
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Duración (segundos)"
+                                    value={newSong.duration}
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            duration: parseInt(e.target.value),
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            image: e.target.files?.[0] || null,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                />
+                                <input
+                                    type="file"
+                                    accept="audio/mp3"
+                                    onChange={(e) =>
+                                        setNewSong({
+                                            ...newSong,
+                                            audio: e.target.files?.[0] || null,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                />
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setIsEditSongDialogOpen(false)
+                                        }
+                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Guardar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

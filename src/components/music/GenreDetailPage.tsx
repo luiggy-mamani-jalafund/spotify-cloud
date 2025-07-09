@@ -6,8 +6,7 @@ import { MusicGenreRepository } from "@/repositories/MusicGenreRepository";
 import { ArtistRepository } from "@/repositories/ArtistRepository";
 import { MusicGenre, Artist } from "@/models/MusicGenre";
 import { UserRole } from "@/models/AppUser";
-import { useRouter, useParams } from "next/navigation";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
@@ -22,6 +21,11 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
         image: null as File | null,
     });
     const [error, setError] = useState("");
+    const [isAddArtistDialogOpen, setIsAddArtistDialogOpen] = useState(false);
+    const [isEditGenreDialogOpen, setIsEditGenreDialogOpen] = useState(false);
+    const [isEditArtistDialogOpen, setIsEditArtistDialogOpen] = useState(false);
+    const [selectedGenre, setSelectedGenre] = useState<MusicGenre | null>(null);
+    const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
     const genreRepo = new MusicGenreRepository();
     const artistRepo = new ArtistRepository();
     const router = useRouter();
@@ -78,24 +82,25 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                 bio: "",
                 image: null as File | null,
             });
+            setIsAddArtistDialogOpen(false);
         } catch (err) {
             setError("Error al agregar artista.");
         }
     };
 
-    const handleUpdateGenre = async (id: string, genre: MusicGenre) => {
-        if (appUser?.role !== UserRole.ADMIN_USER) return;
+    const handleUpdateGenre = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (appUser?.role !== UserRole.ADMIN_USER || !selectedGenre) return;
         try {
-            const newName = prompt("Nuevo nombre", genre.name) || genre.name;
-            const newDescription =
-                prompt("Nueva descripción", genre.description) ||
-                genre.description;
-            const newImage = newArtist.image; // Reusing the form's image input for simplicity
+            const updatedGenre = {
+                name: newArtist.name || selectedGenre.name,
+                description: newArtist.bio || selectedGenre.description,
+            };
             await toast.promise(
                 genreRepo.updateGenre(
-                    id,
-                    { name: newName, description: newDescription },
-                    newImage,
+                    selectedGenre.id!,
+                    updatedGenre,
+                    newArtist.image,
                 ),
                 {
                     loading: "Actualizando género...",
@@ -103,7 +108,15 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                     error: "Error al actualizar género",
                 },
             );
-            setGenre({ ...genre, name: newName, description: newDescription });
+            setGenre({ ...selectedGenre, ...updatedGenre });
+            setNewArtist({
+                name: "",
+                country: "",
+                bio: "",
+                image: null as File | null,
+            });
+            setSelectedGenre(null);
+            setIsEditGenreDialogOpen(false);
         } catch (err) {
             setError("Error al actualizar género.");
         }
@@ -123,19 +136,20 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
         }
     };
 
-    const handleUpdateArtist = async (id: string, artist: Artist) => {
-        if (appUser?.role !== UserRole.ADMIN_USER) return;
+    const handleUpdateArtist = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (appUser?.role !== UserRole.ADMIN_USER || !selectedArtist) return;
         try {
-            const newName = prompt("Nuevo nombre", artist.name) || artist.name;
-            const newCountry =
-                prompt("Nuevo país", artist.country) || artist.country;
-            const newBio = prompt("Nueva biografía", artist.bio) || artist.bio;
-            const newImage = newArtist.image; // Reusing the form's image input
+            const updatedArtist = {
+                name: newArtist.name || selectedArtist.name,
+                country: newArtist.country || selectedArtist.country,
+                bio: newArtist.bio || selectedArtist.bio,
+            };
             await toast.promise(
                 artistRepo.updateArtist(
-                    id,
-                    { name: newName, country: newCountry, bio: newBio },
-                    newImage,
+                    selectedArtist.id!,
+                    updatedArtist,
+                    newArtist.image,
                 ),
                 {
                     loading: "Actualizando artista...",
@@ -145,16 +159,17 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             );
             setArtists(
                 artists.map((a) =>
-                    a.id === id
-                        ? {
-                              ...a,
-                              name: newName,
-                              country: newCountry,
-                              bio: newBio,
-                          }
-                        : a,
+                    a.id === selectedArtist.id ? { ...a, ...updatedArtist } : a,
                 ),
             );
+            setNewArtist({
+                name: "",
+                country: "",
+                bio: "",
+                image: null as File | null,
+            });
+            setSelectedArtist(null);
+            setIsEditArtistDialogOpen(false);
         } catch (err) {
             setError("Error al actualizar artista.");
         }
@@ -204,9 +219,16 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                     {appUser?.role === UserRole.ADMIN_USER && (
                         <div className="mt-4">
                             <button
-                                onClick={() =>
-                                    handleUpdateGenre(genre.id!, genre)
-                                }
+                                onClick={() => {
+                                    setSelectedGenre(genre);
+                                    setNewArtist({
+                                        name: genre.name,
+                                        country: "",
+                                        bio: genre.description || "",
+                                        image: null as File | null,
+                                    });
+                                    setIsEditGenreDialogOpen(true);
+                                }}
                                 className="text-green-400 hover:underline mr-2"
                             >
                                 Editar Género
@@ -227,64 +249,12 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                     Artistas
                 </h3>
                 {appUser?.role === UserRole.ADMIN_USER && (
-                    <form onSubmit={handleAddArtist} className="mb-6 space-y-4">
-                        <input
-                            type="text"
-                            placeholder="Nombre del artista"
-                            value={newArtist.name}
-                            onChange={(e) =>
-                                setNewArtist({
-                                    ...newArtist,
-                                    name: e.target.value,
-                                })
-                            }
-                            className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
-                            required
-                        />
-                        <input
-                            type="text"
-                            placeholder="País"
-                            value={newArtist.country}
-                            onChange={(e) =>
-                                setNewArtist({
-                                    ...newArtist,
-                                    country: e.target.value,
-                                })
-                            }
-                            className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
-                            required
-                        />
-                        <input
-                            type="text"
-                            placeholder="Biografía"
-                            value={newArtist.bio}
-                            onChange={(e) =>
-                                setNewArtist({
-                                    ...newArtist,
-                                    bio: e.target.value,
-                                })
-                            }
-                            className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
-                            required
-                        />
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                                setNewArtist({
-                                    ...newArtist,
-                                    image: e.target.files?.[0] || null,
-                                })
-                            }
-                            className="bg-gray-800 text-white border-gray-700 border rounded-md p-2 w-full"
-                        />
-                        <button
-                            type="submit"
-                            className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
-                        >
-                            Agregar Artista
-                        </button>
-                    </form>
+                    <button
+                        onClick={() => setIsAddArtistDialogOpen(true)}
+                        className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 mb-6"
+                    >
+                        Agregar Artista
+                    </button>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -317,12 +287,16 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                 {appUser?.role === UserRole.ADMIN_USER && (
                                     <>
                                         <button
-                                            onClick={() =>
-                                                handleUpdateArtist(
-                                                    artist.id!,
-                                                    artist,
-                                                )
-                                            }
+                                            onClick={() => {
+                                                setSelectedArtist(artist);
+                                                setNewArtist({
+                                                    name: artist.name,
+                                                    country: artist.country,
+                                                    bio: artist.bio,
+                                                    image: null as File | null,
+                                                });
+                                                setIsEditArtistDialogOpen(true);
+                                            }}
                                             className="text-green-400 hover:underline mr-2"
                                         >
                                             Editar
@@ -344,6 +318,237 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                         </div>
                     ))}
                 </div>
+
+                {isAddArtistDialogOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+                            <h3 className="text-xl font-bold text-white mb-4">
+                                Agregar Artista
+                            </h3>
+                            <form
+                                onSubmit={handleAddArtist}
+                                className="space-y-4"
+                            >
+                                <input
+                                    type="text"
+                                    placeholder="Nombre del artista"
+                                    value={newArtist.name}
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="País"
+                                    value={newArtist.country}
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            country: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Biografía"
+                                    value={newArtist.bio}
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            bio: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            image: e.target.files?.[0] || null,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                />
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setIsAddArtistDialogOpen(false)
+                                        }
+                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Agregar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {isEditGenreDialogOpen && selectedGenre && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+                            <h3 className="text-xl font-bold text-white mb-4">
+                                Editar Género
+                            </h3>
+                            <form
+                                onSubmit={handleUpdateGenre}
+                                className="space-y-4"
+                            >
+                                <input
+                                    type="text"
+                                    placeholder="Nombre del género"
+                                    value={newArtist.name}
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Descripción"
+                                    value={newArtist.bio}
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            bio: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            image: e.target.files?.[0] || null,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                />
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setIsEditGenreDialogOpen(false)
+                                        }
+                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Guardar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {isEditArtistDialogOpen && selectedArtist && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+                            <h3 className="text-xl font-bold text-white mb-4">
+                                Editar Artista
+                            </h3>
+                            <form
+                                onSubmit={handleUpdateArtist}
+                                className="space-y-4"
+                            >
+                                <input
+                                    type="text"
+                                    placeholder="Nombre del artista"
+                                    value={newArtist.name}
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="País"
+                                    value={newArtist.country}
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            country: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Biografía"
+                                    value={newArtist.bio}
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            bio: e.target.value,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                    required
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setNewArtist({
+                                            ...newArtist,
+                                            image: e.target.files?.[0] || null,
+                                        })
+                                    }
+                                    className="bg-gray-700 text-white border-gray-600 border rounded-md p-2 w-full"
+                                />
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setIsEditArtistDialogOpen(false)
+                                        }
+                                        className="bg-gray-600 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                                    >
+                                        Guardar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

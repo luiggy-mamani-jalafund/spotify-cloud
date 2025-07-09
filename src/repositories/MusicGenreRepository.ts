@@ -93,10 +93,14 @@ export class MusicGenreRepository {
                 }
             }
             const docRef = doc(firebaseDb, this.collectionName, id);
-            await updateDoc(docRef, {
-                ...genre,
-                imageUrl: imageUrl || genre.imageUrl,
-            });
+            let toUpdate = genre;
+            if (imageUrl) {
+                toUpdate = {
+                    ...toUpdate,
+                    imageUrl: imageUrl,
+                };
+            }
+            await updateDoc(docRef, toUpdate);
         } catch (e) {
             console.error("Error updating genre: ", e);
             throw e;

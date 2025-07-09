@@ -2,6 +2,7 @@ export interface MusicGenre {
     id?: string;
     name: string;
     description: string;
+    color?: string;
     createdAt: Date;
     imageUrl?: string;
 }

@@ -128,11 +128,20 @@ export class SongRepository {
                 }
             }
             const docRef = doc(firebaseDb, this.collectionName, id);
-            await updateDoc(docRef, {
-                ...song,
-                imageUrl: imageUrl || song.imageUrl,
-                audioUrl: audioUrl || song.audioUrl,
-            });
+            let toUpdate = song;
+            if (imageUrl) {
+                toUpdate = {
+                    ...toUpdate,
+                    imageUrl: imageUrl,
+                };
+            }
+            if (audioUrl) {
+                toUpdate = {
+                    ...toUpdate,
+                    audioUrl: audioUrl,
+                };
+            }
+            await updateDoc(docRef, toUpdate);
         } catch (e) {
             console.error("Error updating song: ", e);
             throw e;

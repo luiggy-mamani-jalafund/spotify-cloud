@@ -97,10 +97,14 @@ export class ArtistRepository {
                 }
             }
             const docRef = doc(firebaseDb, this.collectionName, id);
-            await updateDoc(docRef, {
-                ...artist,
-                imageUrl: imageUrl || artist.imageUrl,
-            });
+            let toUpdate = artist;
+            if (imageUrl) {
+                toUpdate = {
+                    ...toUpdate,
+                    imageUrl: imageUrl,
+                };
+            }
+            await updateDoc(docRef, toUpdate);
         } catch (e) {
             console.error("Error updating artist: ", e);
             throw e;

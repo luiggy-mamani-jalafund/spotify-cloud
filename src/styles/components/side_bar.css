@@ -1,99 +1,42 @@
 .side-nav {
-    position: sticky;
-    top: 0;
-    left: 0;
-    display: grid;
-    grid-template-areas: "header" "body" "footer";
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
-    gap: 14px;
-
-    width: 360px;
-    height: 100vh;
-    padding: 24px;
-
-    position: sticky;
-    background-color: var(--bg-second);
-    border-right: 1px solid var(--stroke-second);
-}
-
-.side-nav-header {
-    grid-area: "header";
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
+
+    padding: 20px 100px;
 }
 
-.side-nav-wrapper {
-    grid-area: "body";
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-
-    width: 100%;
-}
-
-.side-nav-wrapper[data-direction="bottom"] {
-    grid-area: "footer";
-}
-
-.side-nav-sub-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    width: 100%;
-}
-
-.side-nav-wrapper-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-
-    width: 100%;
-    padding: 6px 0px 6px 6px;
-    border-radius: var(--corner-lv2);
-    transition: all ease-out 200ms;
-}
-
-.side-nav-wrapper-item[data-notification="true"] {
+.side-nav-profile-wrapper {
     position: relative;
+    cursor: pointer;
 }
 
-.side-nav-wrapper-item[data-notification="true"]::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    background-color: var(--success);
+.side-nav-profile-photo {
+    --size: 40px;
+    width: var(--size);
+    height: var(--size);
+
     border-radius: 50%;
+    background: #833ab4;
+    background: linear-gradient(
+        90deg,
+        rgba(131, 58, 180, 1) 0%,
+        rgba(253, 29, 29, 1) 50%,
+        rgba(252, 176, 69, 1) 100%
+    );
 }
 
-.side-nav-wrapper-item:hover {
-    background-color: var(--bg);
-}
-
-.side-nav-wrapper-item[data-state="true"] {
-    background-color: var(--main-color-opacity-second);
-}
-
-.nav-source-page {
+.side-nav-profile-info {
     position: absolute;
-    top: 20px;
-    left: 26px;
-}
+    top: 120%;
+    right: 0;
+    display: flex;
+    flex-direction: column;
 
-.nav-logout {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
+    padding: 20px;
+    width: 280px;
 
-    border: none;
-}
-
-.nav-logout:hover {
-    font-weight: 500;
+    background-color: var(--bg-second);
+    border-radius: 5px;
+    border: 1px solid var(--stroke);
 }

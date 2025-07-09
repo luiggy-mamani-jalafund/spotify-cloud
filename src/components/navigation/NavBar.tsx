@@ -2,24 +2,58 @@
 
 import { useAppUser } from "@/hooks/useAppUser";
 import SpotifyWithIcon from "@/icons/SpotifyWithIcon";
+import { UserRole } from "@/models/AppUser";
+import "@/styles/components/side_bar.css";
+import { useEffect, useRef, useState } from "react";
 
 const NavBar = () => {
     const { logout, appUser } = useAppUser();
+    const [isOpen, setOpen] = useState(false);
+    const profileRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                profileRef.current &&
+                !profileRef.current.contains(event.target as Node)
+            ) {
+                setOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     return (
-        <nav className="p-20 flex items-center justify-between bg-gray-900 space-x-8">
+        <nav className="side-nav">
             <SpotifyWithIcon />
             {appUser && (
-                <div>
-                    <div className="w-16 h-16 bg-purple-600 rounded-full"></div>
-                    {/* has to be a modal the profile information*/}
-                    <div>
-                        <h4>{appUser.username}</h4>
-                        <small>{appUser.role}</small>
-                        <button type="button" onClick={logout}>
-                            Logout
-                        </button>
-                    </div>
+                <div className="side-nav-profile-wrapper" ref={profileRef}>
+                    <div
+                        className="side-nav-profile-photo"
+                        onClick={() => setOpen(true)}
+                    ></div>
+
+                    {isOpen && (
+                        <div className="side-nav-profile-info">
+                            <h4 className="notes-lv2">{appUser.username}</h4>
+                            <small className="font notes-lv2 | placeholder">
+                                {appUser.role === UserRole.ADMIN_USER
+                                    ? "Administrador"
+                                    : "Usuario"}
+                            </small>
+                            <button
+                                type="button"
+                                className="logout-button margin-top-25 notes-lv2"
+                                onClick={logout}
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
         </nav>

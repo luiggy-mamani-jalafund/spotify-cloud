@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useFirebaseUser } from "@/hooks/useFirebaseUser";
+import "@/styles/components/auth.css";
+import Google from "@/icons/Google";
+import Spotify from "@/icons/Spotify";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -29,68 +32,58 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-                <form onSubmit={handleLogin} className="space-y-4">
-                    <div>
-                        <label
-                            htmlFor="email"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Email
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="password"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Password
-                        </label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            required
-                        />
-                    </div>
+        <div className="spotify-auth-wrapper">
+            <div className="spotify-auth-container">
+                <span className="icon icon-xxl">
+                    <Spotify />
+                </span>
+                <h2 className="spotify-title">Login</h2>
+
+                {error && <p className="auth-error">{error}</p>}
+
+                <form onSubmit={handleLogin} className="spotify-form">
+                    <input
+                        id="email"
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="spotify-input"
+                        required
+                    />
+
+                    <input
+                        id="password"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="spotify-input"
+                        required
+                    />
+
                     <button
                         type="submit"
+                        className="spotify-btn spotify-btn-green form"
                         disabled={userLoading}
-                        className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
                         {userLoading ? "Cargando..." : "Iniciar Sesión"}
                     </button>
                 </form>
-                <div className="mt-4">
-                    <button
-                        onClick={handleGoogleLogin}
-                        disabled={userLoading}
-                        className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 disabled:opacity-50"
-                    >
-                        Login with Google
-                    </button>
-                </div>
-                <p className="mt-4 text-center text-sm text-gray-600">
-                    Don't you have an account yet?{" "}
-                    <a
-                        href="/signup"
-                        className="text-indigo-600 hover:underline"
-                    >
-                        Sign up
-                    </a>
+
+                <button
+                    onClick={handleGoogleLogin}
+                    className="spotify-btn spotify-btn-google margin-top-50"
+                    disabled={userLoading}
+                >
+                    <span className="icon spotify-btn-icon google-icon">
+                        <Google />
+                    </span>
+                    Continue with Google
+                </button>
+
+                <p className="auth-footer">
+                    Don't you have an account yet? <a href="/signup">Sign up</a>
                 </p>
             </div>
         </div>

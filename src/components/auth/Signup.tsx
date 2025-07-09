@@ -4,6 +4,9 @@ import { useFirebaseUser } from "@/hooks/useFirebaseUser";
 import { AppUserRepository } from "@/repositories/UserProfileRepository";
 import { firebaseAuth } from "@/firebase/FirebaseConfig";
 import { UserRole } from "@/models/AppUser";
+import "@/styles/components/auth.css";
+import Google from "@/icons/Google";
+import Spotify from "@/icons/Spotify";
 
 export default function Signup() {
     const [email, setEmail] = useState("");
@@ -55,84 +58,68 @@ export default function Signup() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-6 text-center">Sign up</h2>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-                <form onSubmit={handleSignup} className="space-y-4">
-                    <div>
-                        <label
-                            htmlFor="fullName"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Name
-                        </label>
-                        <input
-                            id="fullName"
-                            type="text"
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="email"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Email
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="password"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Password
-                        </label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            required
-                        />
-                    </div>
+        <div className="spotify-auth-wrapper">
+            <div className="spotify-auth-container">
+                <span className="icon icon-xxl">
+                    <Spotify />
+                </span>
+                <h2 className="spotify-title margin-top-15">Sign up</h2>
+
+                {error && <p className="auth-error">{error}</p>}
+
+                <form onSubmit={handleSignup} className="spotify-form">
+                    <input
+                        id="fullName"
+                        type="text"
+                        placeholder="Full Name"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="spotify-input"
+                        required
+                    />
+
+                    <input
+                        id="email"
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="spotify-input"
+                        required
+                    />
+
+                    <input
+                        id="password"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="spotify-input"
+                        required
+                    />
+
                     <button
                         type="submit"
+                        className="spotify-btn spotify-btn-green form"
                         disabled={userLoading}
-                        className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
                         {userLoading ? "Cargando..." : "Registrarse"}
                     </button>
                 </form>
-                <div className="mt-4">
-                    <button
-                        onClick={handleGoogleSignup}
-                        disabled={userLoading}
-                        className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 disabled:opacity-50"
-                    >
-                        Sign up with Google
-                    </button>
-                </div>
-                <p className="mt-4 text-center text-sm text-gray-600">
-                    Do you already have an account?{" "}
-                    <a
-                        href="/login"
-                        className="text-indigo-600 hover:underline"
-                    >
-                        Login
-                    </a>
+
+                <button
+                    onClick={handleGoogleSignup}
+                    className="spotify-btn spotify-btn-google margin-top-50"
+                    disabled={userLoading}
+                >
+                    <span className="icon spotify-btn-icon google-icon">
+                        <Google />
+                    </span>
+                    Continue with Google
+                </button>
+
+                <p className="auth-footer">
+                    Do you already have an account? <a href="/login">Login</a>
                 </p>
             </div>
         </div>

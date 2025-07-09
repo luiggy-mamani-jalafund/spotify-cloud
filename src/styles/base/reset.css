@@ -15,7 +15,7 @@ body {
     height: 100vh;
 
     scroll-behavior: smooth;
-    font-family: "SofiaSans", sans-serif;
+    font-family: "Helvetica Neue", sans-serif;
 
     background-color: var(--bg);
     color: var(--text);
@@ -35,13 +35,13 @@ main {
 
 input {
     outline: none;
-    font-family: "SofiaSans", monospace;
+    font-family: "Helvetica Neue", sans-serif;
 }
 
 button {
     background-color: transparent;
     cursor: pointer;
-    font-family: "SofiaSans", monospace;
+    font-family: "Helvetica Neue", sans-serif;
 }
 
 button:disabled {
@@ -75,7 +75,7 @@ progress {
 
 textarea {
     resize: none;
-    font-family: "SofiaSans", sans-serif;
+    font-family: "Helvetica Neue", sans-serif;
 }
 
 input:-webkit-autofill,

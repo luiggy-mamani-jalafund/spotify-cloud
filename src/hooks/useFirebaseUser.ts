@@ -29,7 +29,7 @@ export const useFirebaseUser = () => {
             );
             const user = userCredential.user;
             console.log("User signed in:", user);
-            router.push("/");
+            router.push("/music/genres");
         } catch (error: any) {
             const errorCode = error.code;
             const errorMessage = error.message;
@@ -53,7 +53,7 @@ export const useFirebaseUser = () => {
                 displayName: fullName,
             });
             console.log("Profile updated successfully");
-            router.push("/");
+            router.push("/music/genres");
         } catch (error: any) {
             const errorCode = error.code ?? 500;
             const errorMessage = error.message;
@@ -68,7 +68,7 @@ export const useFirebaseUser = () => {
             GoogleAuthProvider.credentialFromResult(result);
 
             console.log("User signed in with Google:", result.user);
-            router.push("/");
+            router.push("/music/genres");
         } catch (error: any) {
             const errorCode = error.code ?? 500;
             const errorMessage =

@@ -26,7 +26,6 @@ export default function GenresPage() {
         color: "",
         image: null as File | null,
     });
-    const [error, setError] = useState("");
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [selectedGenre, setSelectedGenre] = useState<MusicGenre | null>(null);
@@ -46,7 +45,7 @@ export default function GenresPage() {
             const fetchedGenres = await genreRepo.getAllGenres();
             setGenres(fetchedGenres);
         } catch (err) {
-            setError("Error al cargar géneros.");
+            toast.error("Error al cargar géneros.");
         }
     };
 
@@ -74,7 +73,7 @@ export default function GenresPage() {
             setNewGenre({ name: "", description: "", color: "", image: null });
             setIsAddDialogOpen(false);
         } catch (err) {
-            setError("Error al agregar género.");
+            toast.error("Error al agregar género.");
         }
     };
 
@@ -110,7 +109,7 @@ export default function GenresPage() {
             setSelectedGenre(null);
             setIsEditDialogOpen(false);
         } catch (err) {
-            setError("Error al actualizar género.");
+            toast.error("Error al actualizar género.");
         }
     };
 
@@ -124,7 +123,7 @@ export default function GenresPage() {
             });
             setGenres(genres.filter((g) => g.id !== id));
         } catch (err) {
-            setError("Error al eliminar género.");
+            toast.error("Error al eliminar género.");
         }
     };
 

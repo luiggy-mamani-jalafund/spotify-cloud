@@ -28,7 +28,6 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
         bio: "",
         image: null as File | null,
     });
-    const [error, setError] = useState("");
     const [isAddArtistDialogOpen, setIsAddArtistDialogOpen] = useState(false);
     const [isEditGenreDialogOpen, setIsEditGenreDialogOpen] = useState(false);
     const [isEditArtistDialogOpen, setIsEditArtistDialogOpen] = useState(false);
@@ -52,7 +51,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             const fetchedGenre = await genreRepo.getGenre(genreId);
             setGenre(fetchedGenre);
         } catch (err) {
-            setError("Error al cargar género.");
+            toast.error("Error al cargar género.");
         }
     };
 
@@ -61,7 +60,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             const fetchedArtists = await artistRepo.getArtistsByGenre(genreId);
             setArtists(fetchedArtists);
         } catch (err) {
-            setError("Error al cargar artistas.");
+            toast.error("Error al cargar artistas.");
         }
     };
 
@@ -92,7 +91,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             });
             setIsAddArtistDialogOpen(false);
         } catch (err) {
-            setError("Error al agregar artista.");
+            toast.error("Error al agregar artista.");
         }
     };
 
@@ -126,7 +125,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             setSelectedGenre(null);
             setIsEditGenreDialogOpen(false);
         } catch (err) {
-            setError("Error al actualizar género.");
+            toast.error("Error al actualizar género.");
         }
     };
 
@@ -170,7 +169,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             setSelectedArtist(null);
             setIsEditArtistDialogOpen(false);
         } catch (err) {
-            setError("Error al actualizar artista.");
+            toast.error("Error al actualizar artista.");
         }
     };
 
@@ -184,7 +183,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             });
             setArtists(artists.filter((a) => a.id !== id));
         } catch (err) {
-            setError("Error al eliminar artista.");
+            toast.error("Error al eliminar artista.");
         }
     };
 

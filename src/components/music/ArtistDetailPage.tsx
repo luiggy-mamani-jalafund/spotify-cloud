@@ -25,7 +25,6 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
         image: null as File | null,
         audio: null as File | null,
     });
-    const [error, setError] = useState("");
     const [isAddSongDialogOpen, setIsAddSongDialogOpen] = useState(false);
     const [isEditArtistDialogOpen, setIsEditArtistDialogOpen] = useState(false);
     const [isEditSongDialogOpen, setIsEditSongDialogOpen] = useState(false);
@@ -55,7 +54,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                 genreId: fetchedArtist?.genreId || "",
             }));
         } catch (err) {
-            setError("Error al cargar artista.");
+            toast.error("Error al cargar artista.");
         }
     };
 
@@ -64,7 +63,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             const fetchedSongs = await songRepo.getSongsByArtist(artistId);
             setSongs(fetchedSongs);
         } catch (err) {
-            setError("Error al cargar canciones.");
+            toast.error("Error al cargar canciones.");
         }
     };
 
@@ -101,7 +100,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             });
             setIsAddSongDialogOpen(false);
         } catch (err) {
-            setError("Error al agregar canción.");
+            toast.error("Error al agregar canción.");
         }
     };
 
@@ -138,7 +137,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             setSelectedArtist(null);
             setIsEditArtistDialogOpen(false);
         } catch (err) {
-            setError("Error al actualizar artista.");
+            toast.error("Error al actualizar artista.");
         }
     };
 
@@ -152,7 +151,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             });
             router.push(`/genres/${artist?.genreId}`);
         } catch (err) {
-            setError("Error al eliminar artista.");
+            toast.error("Error al eliminar artista.");
         }
     };
 
@@ -193,7 +192,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             setSelectedSong(null);
             setIsEditSongDialogOpen(false);
         } catch (err) {
-            setError("Error al actualizar canción.");
+            toast.error("Error al actualizar canción.");
         }
     };
 
@@ -211,7 +210,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             });
             setSongs(songs.filter((s) => s.id !== id));
         } catch (err) {
-            setError("Error al eliminar canción.");
+            toast.error("Error al eliminar canción.");
         }
     };
 

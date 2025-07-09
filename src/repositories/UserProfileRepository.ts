@@ -1,6 +1,7 @@
 import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { firebaseDb } from "../firebase/FirebaseConfig";
 import { AppUser } from "@/models/AppUser";
+import toast from "react-hot-toast";
 
 export class AppUserRepository {
     collectionName = "spotify-users";
@@ -21,6 +22,7 @@ export class AppUserRepository {
                 id: docRef.id,
             };
         } catch (e) {
+            toast.error("Error configuring user account");
             throw e;
         }
     }
@@ -38,7 +40,7 @@ export class AppUserRepository {
             }
             return null;
         } catch (e) {
-            console.error("Error fetching user profile: ", e);
+            toast.error("Error fetching user profile");
             throw e;
         }
     }

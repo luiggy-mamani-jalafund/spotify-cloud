@@ -1,8 +1,8 @@
 export class MediaRepository {
-    async uploadFile(file: File, folder: string): Promise<string> {
+    async uploadFile(file: File): Promise<string> {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("folder", folder);
+        formData.append("folder", "files");
 
         const response = await fetch("/api/upload-image", {
             method: "POST",

@@ -26,26 +26,28 @@ export class SongRepository {
         try {
             let imageUrl: string | undefined;
             let audioUrl: string | undefined;
+
             if (image) {
                 imageUrl = await toast.promise(
-                    this.mediaRepo.uploadFile(image, "songs"),
+                    this.mediaRepo.uploadFile(image),
                     {
-                        loading: "Subiendo imagen...",
-                        success: "Imagen subida",
-                        error: "Error al subir imagen",
+                        loading: "Uploading image...",
+                        success: "Image uploaded",
+                        error: "Error uploading image",
                     },
                 );
             }
             if (audio) {
                 audioUrl = await toast.promise(
-                    this.mediaRepo.uploadFile(audio, "songs"),
+                    this.mediaRepo.uploadFile(audio),
                     {
-                        loading: "Subiendo audio...",
-                        success: "Audio subido",
-                        error: "Error al subir audio",
+                        loading: "Uploading audio...",
+                        success: "Audio uploaded",
+                        error: "Error uploading audio",
                     },
                 );
             }
+
             const docRef = await addDoc(
                 collection(firebaseDb, this.collectionName),
                 {
@@ -55,6 +57,7 @@ export class SongRepository {
                     audioUrl,
                 },
             );
+
             return { ...song, id: docRef.id, imageUrl, audioUrl };
         } catch (e) {
             console.error("Error adding song: ", e);
@@ -66,6 +69,7 @@ export class SongRepository {
         try {
             const docRef = doc(firebaseDb, this.collectionName, id);
             const docSnap = await getDoc(docRef);
+
             if (docSnap.exists()) {
                 return { id: docSnap.id, ...docSnap.data() } as Song;
             }
@@ -83,6 +87,7 @@ export class SongRepository {
                 where("artistId", "==", artistId),
             );
             const querySnapshot = await getDocs(q);
+
             return querySnapshot.docs.map(
                 (doc) => ({ id: doc.id, ...doc.data() } as Song),
             );
@@ -101,13 +106,14 @@ export class SongRepository {
         try {
             let imageUrl: string | undefined;
             let audioUrl: string | undefined;
+
             if (image) {
                 imageUrl = await toast.promise(
-                    this.mediaRepo.uploadFile(image, "songs"),
+                    this.mediaRepo.uploadFile(image),
                     {
-                        loading: "Subiendo imagen...",
-                        success: "Imagen subida",
-                        error: "Error al subir imagen",
+                        loading: "Uploading image...",
+                        success: "Image uploaded",
+                        error: "Error uploading image",
                     },
                 );
                 if (song.imageUrl) {
@@ -116,19 +122,21 @@ export class SongRepository {
             }
             if (audio) {
                 audioUrl = await toast.promise(
-                    this.mediaRepo.uploadFile(audio, "songs"),
+                    this.mediaRepo.uploadFile(audio),
                     {
-                        loading: "Subiendo audio...",
-                        success: "Audio subido",
-                        error: "Error al subir audio",
+                        loading: "Uploading audio...",
+                        success: "Audio uploaded",
+                        error: "Error uploading audio",
                     },
                 );
                 if (song.audioUrl) {
                     await this.mediaRepo.deleteFile(song.audioUrl);
                 }
             }
+
             const docRef = doc(firebaseDb, this.collectionName, id);
             let toUpdate = song;
+
             if (imageUrl) {
                 toUpdate = {
                     ...toUpdate,
@@ -141,6 +149,7 @@ export class SongRepository {
                     audioUrl: audioUrl,
                 };
             }
+
             await updateDoc(docRef, toUpdate);
         } catch (e) {
             console.error("Error updating song: ", e);
@@ -156,18 +165,19 @@ export class SongRepository {
         try {
             if (imageUrl) {
                 await toast.promise(this.mediaRepo.deleteFile(imageUrl), {
-                    loading: "Eliminando imagen...",
-                    success: "Imagen eliminada",
-                    error: "Error al eliminar imagen",
+                    loading: "Deleting image...",
+                    success: "Image deleted",
+                    error: "Error deleting image",
                 });
             }
             if (audioUrl) {
                 await toast.promise(this.mediaRepo.deleteFile(audioUrl), {
-                    loading: "Eliminando audio...",
-                    success: "Audio eliminado",
-                    error: "Error al eliminar audio",
+                    loading: "Deleting audio...",
+                    success: "Audio deleted",
+                    error: "Error deleting audio",
                 });
             }
+
             const docRef = doc(firebaseDb, this.collectionName, id);
             await deleteDoc(docRef);
         } catch (e) {

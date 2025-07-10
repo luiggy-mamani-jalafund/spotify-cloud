@@ -19,9 +19,9 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
-        const publicId = url.match(/\/(genres|artists|songs)\/(.+)\.\w+$/)?.[2];
+        const publicId = url.match(/\/files\/(.+)\.\w+$/)?.[1];
         if (publicId) {
-            await cloudinary.uploader.destroy(`${publicId}`, {
+            await cloudinary.uploader.destroy(`files/${publicId}`, {
                 resource_type: url.includes(".mp3") ? "video" : "image",
             });
         }

@@ -160,7 +160,7 @@
 
 .btn-play-small {
     background-color: #1db954;
-    color: #fff;
+    color: var(--bg);
     border: none;
     border-radius: 50%;
     width: 32px;

@@ -61,6 +61,11 @@ border-radius: 4px;
     height: 20px;
 }
 
+.icon-ssm > svg {
+    width: 13px;
+    height: 13px;
+}
+
 .icon-sm > svg {
     width: 16px;
     height: 16px;

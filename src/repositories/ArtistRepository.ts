@@ -24,11 +24,11 @@ export class ArtistRepository {
             let imageUrl: string | undefined;
             if (image) {
                 imageUrl = await toast.promise(
-                    this.mediaRepo.uploadFile(image, "artists"),
+                    this.mediaRepo.uploadFile(image),
                     {
-                        loading: "Subiendo imagen...",
-                        success: "Imagen subida",
-                        error: "Error al subir imagen",
+                        loading: "Uploading image...",
+                        success: "Image uploaded",
+                        error: "Error uploading image",
                     },
                 );
             }
@@ -85,11 +85,11 @@ export class ArtistRepository {
             let imageUrl: string | undefined;
             if (image) {
                 imageUrl = await toast.promise(
-                    this.mediaRepo.uploadFile(image, "artists"),
+                    this.mediaRepo.uploadFile(image),
                     {
-                        loading: "Subiendo imagen...",
-                        success: "Imagen subida",
-                        error: "Error al subir imagen",
+                        loading: "Uploading image...",
+                        success: "Image uploaded",
+                        error: "Error uploading image",
                     },
                 );
                 if (artist.imageUrl) {
@@ -115,9 +115,9 @@ export class ArtistRepository {
         try {
             if (imageUrl) {
                 await toast.promise(this.mediaRepo.deleteFile(imageUrl), {
-                    loading: "Eliminando imagen...",
-                    success: "Imagen eliminada",
-                    error: "Error al eliminar imagen",
+                    loading: "Deleting image...",
+                    success: "Image deleted",
+                    error: "Error deleting image",
                 });
             }
             const docRef = doc(firebaseDb, this.collectionName, id);

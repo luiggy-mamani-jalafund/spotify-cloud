@@ -1,4 +1,5 @@
 "use client";
+import { Analytics, getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -17,6 +18,11 @@ export const firebaseApp = initializeApp(firebaseConfig);
 export const firebaseAuth = getAuth(firebaseApp);
 export const firebaseDb = getFirestore(firebaseApp);
 
+let firebaseAnalytics: Analytics | undefined = undefined;
+if (typeof window !== "undefined") {
+    firebaseAnalytics = getAnalytics(firebaseApp);
+}
+
 firebaseAuth.useDeviceLanguage();
 
 let firebaseUi: firebaseui.auth.AuthUI | null = null;
@@ -26,4 +32,4 @@ if (typeof window !== "undefined") {
     });
 }
 
-export { firebaseUi };
+export { firebaseUi, firebaseAnalytics };

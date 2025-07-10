@@ -25,3 +25,12 @@
     border: none;
     color: var(--text);
 }
+
+.btn-link {
+    margin-left: 16px;
+    color: var(--main-color);
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+}

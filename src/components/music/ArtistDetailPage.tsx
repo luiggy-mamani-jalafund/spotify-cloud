@@ -6,12 +6,15 @@ import { ArtistRepository } from "@/repositories/ArtistRepository";
 import { SongRepository } from "@/repositories/SongRepository";
 import { Artist, Song } from "@/models/MusicGenre";
 import { UserRole } from "@/models/AppUser";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import PageLoader from "../navigation/PageLoader";
 import "@/styles/modules/modal.css";
 import "@/styles/components/songs.css";
 import "@/styles/modules/form.css";
+import Pause from "@/icons/Pause";
+import { Timestamp } from "firebase/firestore";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export default function ArtistDetailPage({ artistId }: { artistId: string }) {
     const { appUser, appUserLoading, userLoading } = useAppUser();
@@ -37,6 +40,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
     const router = useRouter();
     const artistRepo = new ArtistRepository();
     const songRepo = new SongRepository();
+    const { logPageView, logButtonClick } = useAnalytics();
 
     useEffect(() => {
         if (!appUserLoading && !userLoading && !appUser) {
@@ -66,8 +70,12 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                 artistId,
                 genreId: fetchedArtist?.genreId || "",
             }));
+            logPageView(
+                `/music/genres/${fetchedArtist?.genreId}/${artistId}`,
+                `${fetchedArtist?.name} Artist Page`,
+            );
         } catch (err) {
-            toast.error("Error al cargar artista.");
+            toast.error("Error loading the artist");
         }
     };
 
@@ -76,7 +84,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             const fetchedSongs = await songRepo.getSongsByArtist(artistId);
             setSongs(fetchedSongs);
         } catch (err) {
-            toast.error("Error al cargar canciones.");
+            toast.error("Error loading songs");
         }
     };
 
@@ -91,15 +99,15 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                         duration: newSong.duration,
                         artistId,
                         genreId: newSong.genreId,
-                        releaseDate: new Date(),
+                        releaseDate: Timestamp.now(),
                     },
                     newSong.image,
                     newSong.audio,
                 ),
                 {
-                    loading: "Agregando canción...",
-                    success: "Canción agregada",
-                    error: "Error al agregar canción",
+                    loading: "Creaing song...",
+                    success: "Created",
+                    error: "Something bad happend creating the song",
                 },
             );
             setSongs([...songs, addedSong]);
@@ -113,7 +121,17 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             });
             setIsAddSongDialogOpen(false);
         } catch (err) {
-            toast.error("Error al agregar canción.");
+            toast.error("Error during the creation of the song.");
+        }
+    };
+
+    const handleLike = () => {
+        if (artist) {
+            logButtonClick(
+                "handleLike",
+                `/music/genres/${artist?.genreId}/${artistId}`,
+            );
+            toast.success("Liked");
         }
     };
 
@@ -133,9 +151,9 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                     newSong.image,
                 ),
                 {
-                    loading: "Actualizando artista...",
-                    success: "Artista actualizado",
-                    error: "Error al actualizar artista",
+                    loading: "Updating artist...",
+                    success: "Updated",
+                    error: "Error updating",
                 },
             );
             setArtist({ ...selectedArtist, ...updatedArtist });
@@ -150,7 +168,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             setSelectedArtist(null);
             setIsEditArtistDialogOpen(false);
         } catch (err) {
-            toast.error("Error al actualizar artista.");
+            toast.error("Error updating.");
         }
     };
 
@@ -158,13 +176,13 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
         if (appUser?.role !== UserRole.ADMIN_USER) return;
         try {
             await toast.promise(artistRepo.deleteArtist(id, imageUrl), {
-                loading: "Eliminando artista...",
-                success: "Artista eliminado",
-                error: "Error al eliminar artista",
+                loading: "Deleting artist...",
+                success: "Deleted",
+                error: "Error deleting",
             });
             router.push(`/genres/${artist?.genreId}`);
         } catch (err) {
-            toast.error("Error al eliminar artista.");
+            toast.error("Error deleting.");
         }
     };
 
@@ -184,9 +202,9 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                     newSong.audio,
                 ),
                 {
-                    loading: "Actualizando canción...",
-                    success: "Canción actualizada",
-                    error: "Error al actualizar canción",
+                    loading: "Updating song...",
+                    success: "Updated",
+                    error: "Something bad happened during the update of the song",
                 },
             );
             setSongs(
@@ -205,7 +223,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             setSelectedSong(null);
             setIsEditSongDialogOpen(false);
         } catch (err) {
-            toast.error("Error al actualizar canción.");
+            toast.error("Something bad happened updating the song");
         }
     };
 
@@ -217,13 +235,13 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
         if (appUser?.role !== UserRole.ADMIN_USER) return;
         try {
             await toast.promise(songRepo.deleteSong(id, imageUrl, audioUrl), {
-                loading: "Eliminando canción...",
-                success: "Canción eliminada",
-                error: "Error al eliminar canción",
+                loading: "Deleting...",
+                success: "Deleted",
+                error: "Something bad happened",
             });
             setSongs(songs.filter((s) => s.id !== id));
         } catch (err) {
-            toast.error("Error al eliminar canción.");
+            toast.error("Error during the song delete action");
         }
     };
 
@@ -276,7 +294,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                     <h1 className="artist-title">{artist.name}</h1>
                     <p className="artist-description">{artist.bio}</p>
                     <span className="artist-country">
-                        País: {artist.country}
+                        Country: {artist.country}
                     </span>
                 </div>
             </div>
@@ -285,35 +303,19 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                 <button className="btn-play" onClick={handlePlayAll}>
                     ▶
                 </button>
-                <button className="btn-icon">❤</button>
-                <button className="btn-icon">⋯</button>
+                <button className="btn-icon" onClick={handleLike}>
+                    ❤
+                </button>
 
                 {appUser?.role === UserRole.ADMIN_USER && (
                     <div className="admin-actions">
-                        <button
-                            onClick={() => {
-                                setSelectedArtist(artist);
-                                setNewSong({
-                                    name: artist.name,
-                                    duration: 0,
-                                    artistId,
-                                    genreId: artist.genreId || "",
-                                    image: null,
-                                    audio: null,
-                                });
-                                setIsEditArtistDialogOpen(true);
-                            }}
-                            className="btn-link"
-                        >
-                            Editar Artista
-                        </button>
                         <button
                             onClick={() =>
                                 handleDeleteArtist(artist.id!, artist.imageUrl)
                             }
                             className="btn-link delete"
                         >
-                            Eliminar Artista
+                            Delete
                         </button>
                     </div>
                 )}
@@ -328,71 +330,81 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             </div>
 
             <div className="songs-list">
-                {songs.map((song, index) => (
-                    <div key={song.id} className="song-row">
-                        <button
-                            className="btn-play-small"
-                            onClick={() => handlePlaySong(song)}
-                        >
-                            ▶
-                        </button>
-                        <div className="song-title">
-                            {song.imageUrl && (
-                                <img
-                                    src={song.imageUrl}
-                                    alt={song.name}
-                                    className="song-thumbnail"
-                                />
-                            )}
-                            <div>
-                                <div className="song-name">{song.name}</div>
-                                <div className="song-artist">{artist.name}</div>
-                            </div>
-                        </div>
-                        <div className="song-album">Album {artist.name}</div>
-                        <div className="song-date">
-                            {new Date(song.releaseDate).toLocaleDateString()}
-                        </div>
-                        <div className="song-duration">
-                            {Math.floor(song.duration / 60)}:
-                            {(song.duration % 60).toString().padStart(2, "0")}
-                        </div>
+                {songs.map((song, index) => {
+                    console.log(song.releaseDate);
 
-                        {appUser?.role === UserRole.ADMIN_USER && (
-                            <div className="song-row-actions">
-                                <button
-                                    onClick={() => {
-                                        setSelectedSong(song);
-                                        setNewSong({
-                                            name: song.name,
-                                            duration: song.duration,
-                                            artistId,
-                                            genreId: song.genreId,
-                                            image: null,
-                                            audio: null,
-                                        });
-                                        setIsEditSongDialogOpen(true);
-                                    }}
-                                    className="btn-link"
-                                >
-                                    Editar
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        handleDeleteSong(
-                                            song.id!,
-                                            song.imageUrl,
-                                            song.audioUrl,
-                                        )
-                                    }
-                                    className="btn-link delete"
-                                >
-                                    Eliminar
-                                </button>
+                    return (
+                        <div key={song.id} className="song-row">
+                            <button
+                                className="btn-play-small"
+                                onClick={() => handlePlaySong(song)}
+                            >
+                                ▶
+                            </button>
+                            <div className="song-title">
+                                {song.imageUrl && (
+                                    <img
+                                        src={song.imageUrl}
+                                        alt={song.name}
+                                        className="song-thumbnail"
+                                    />
+                                )}
+                                <div>
+                                    <div className="song-name">{song.name}</div>
+                                    <div className="song-artist">
+                                        {artist.name}
+                                    </div>
+                                </div>
                             </div>
-                        )}
-                    </div>
-                ))}
+                            <div className="song-album">
+                                Album {artist.name}
+                            </div>
+                            <div className="song-date">
+                                {song.releaseDate.toDate().toLocaleDateString()}
+                            </div>
+                            <div className="song-duration">
+                                {Math.floor(song.duration / 60)}:
+                                {(song.duration % 60)
+                                    .toString()
+                                    .padStart(2, "0")}
+                            </div>
+
+                            {appUser?.role === UserRole.ADMIN_USER && (
+                                <div className="song-row-actions">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedSong(song);
+                                            setNewSong({
+                                                name: song.name,
+                                                duration: song.duration,
+                                                artistId,
+                                                genreId: song.genreId,
+                                                image: null,
+                                                audio: null,
+                                            });
+                                            setIsEditSongDialogOpen(true);
+                                        }}
+                                        className="btn-link"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            handleDeleteSong(
+                                                song.id!,
+                                                song.imageUrl,
+                                                song.audioUrl,
+                                            )
+                                        }
+                                        className="btn-link delete"
+                                    >
+                                        Eliminar
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             <audio ref={audioRef} onEnded={() => setIsPlaying(false)} />
@@ -424,7 +436,13 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                             }
                         }}
                     >
-                        {isPlaying ? "⏸" : "▶"}
+                        {isPlaying ? (
+                            <span className="icon icon-ssm">
+                                <Pause />
+                            </span>
+                        ) : (
+                            <span style={{ color: "#000" }}>▶</span>
+                        )}
                     </button>
                     <div className="player-progress">
                         <span>
@@ -460,7 +478,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                         onClick={() => setIsAddSongDialogOpen(true)}
                         className="btn-add-song"
                     >
-                        Agregar Canción
+                        Add Song
                     </button>
                 </div>
             )}
@@ -468,11 +486,11 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             {isAddSongDialogOpen && (
                 <div className="overall child-center">
                     <div className="form-container">
-                        <h3 className="form-title">Agregar Canción</h3>
+                        <h3 className="form-title">Add Song</h3>
                         <form onSubmit={handleAddSong} className="form-body">
                             <input
                                 type="text"
-                                placeholder="Nombre de la canción"
+                                placeholder="Enter the name of the song"
                                 value={newSong.name}
                                 onChange={(e) =>
                                     setNewSong({
@@ -485,8 +503,8 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                             />
                             <input
                                 type="number"
-                                placeholder="Duración (segundos)"
-                                value={newSong.duration}
+                                placeholder="Duration (seg)"
+                                value={newSong.duration ?? 0}
                                 onChange={(e) =>
                                     setNewSong({
                                         ...newSong,
@@ -526,10 +544,10 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                                     }
                                     className="btn-cancel"
                                 >
-                                    Cancelar
+                                    Cancel
                                 </button>
                                 <button type="submit" className="btn-submit">
-                                    Agregar
+                                    Add
                                 </button>
                             </div>
                         </form>
@@ -540,14 +558,14 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             {isEditArtistDialogOpen && selectedArtist && (
                 <div className="overall child-center">
                     <div className="form-container">
-                        <h3 className="form-title">Editar Artista</h3>
+                        <h3 className="form-title">Edit Artist</h3>
                         <form
                             onSubmit={handleUpdateArtist}
                             className="form-body"
                         >
                             <input
                                 type="text"
-                                placeholder="Nombre del artista"
+                                placeholder="Name of the artist"
                                 value={newSong.name}
                                 onChange={(e) =>
                                     setNewSong({
@@ -573,7 +591,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                             />
                             <input
                                 type="text"
-                                placeholder="Biografía"
+                                placeholder="Enter their bio"
                                 value={newSong.name}
                                 onChange={(e) =>
                                     setNewSong({
@@ -603,10 +621,10 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                                     }
                                     className="btn-cancel"
                                 >
-                                    Cancelar
+                                    Cancel
                                 </button>
                                 <button type="submit" className="btn-submit">
-                                    Guardar
+                                    Save
                                 </button>
                             </div>
                         </form>
@@ -617,11 +635,11 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
             {isEditSongDialogOpen && selectedSong && (
                 <div className="overall child-center">
                     <div className="form-container">
-                        <h3 className="form-title">Editar Canción</h3>
+                        <h3 className="form-title">Edit Song</h3>
                         <form onSubmit={handleUpdateSong} className="form-body">
                             <input
                                 type="text"
-                                placeholder="Nombre de la canción"
+                                placeholder="Name of the song"
                                 value={newSong.name}
                                 onChange={(e) =>
                                     setNewSong({
@@ -634,7 +652,7 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                             />
                             <input
                                 type="number"
-                                placeholder="Duración (segundos)"
+                                placeholder="Duration (seg)"
                                 value={newSong.duration}
                                 onChange={(e) =>
                                     setNewSong({
@@ -675,10 +693,10 @@ export default function ArtistDetailPage({ artistId }: { artistId: string }) {
                                     }
                                     className="btn-cancel"
                                 >
-                                    Cancelar
+                                    Cancel
                                 </button>
                                 <button type="submit" className="btn-submit">
-                                    Guardar
+                                    Save
                                 </button>
                             </div>
                         </form>

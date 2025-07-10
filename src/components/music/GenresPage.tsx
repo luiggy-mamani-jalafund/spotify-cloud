@@ -16,6 +16,8 @@ import Pen from "@/icons/Pen";
 import Trash from "@/icons/Trash";
 import PageLoader from "../navigation/PageLoader";
 import Spotify from "@/icons/Spotify";
+import { Timestamp } from "firebase/firestore";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export default function GenresPage() {
     const { appUser, appUserLoading, userLoading } = useAppUser();
@@ -31,12 +33,14 @@ export default function GenresPage() {
     const [selectedGenre, setSelectedGenre] = useState<MusicGenre | null>(null);
     const genreRepo = new MusicGenreRepository();
     const router = useRouter();
+    const { logPageView } = useAnalytics();
 
     useEffect(() => {
         if (!appUserLoading && !userLoading && !appUser) {
             router.push("/login");
         } else {
             fetchGenres();
+            logPageView("/music/genres", "Genres Page");
         }
     }, [appUser, appUserLoading, userLoading]);
 
@@ -59,21 +63,21 @@ export default function GenresPage() {
                         name: newGenre.name,
                         description: newGenre.description,
                         color: newGenre.color || "#121212",
-                        createdAt: new Date(),
+                        createdAt: Timestamp.now(),
                     },
                     newGenre.image,
                 ),
                 {
-                    loading: "Agregando género...",
-                    success: "Género agregado",
-                    error: "Error al agregar género",
+                    loading: "Creating gener...",
+                    success: "Created",
+                    error: "Error during the creation of the genre",
                 },
             );
             setGenres([...genres, addedGenre]);
             setNewGenre({ name: "", description: "", color: "", image: null });
             setIsAddDialogOpen(false);
         } catch (err) {
-            toast.error("Error al agregar género.");
+            toast.error("Error to create the genre.");
         }
     };
 
@@ -95,9 +99,9 @@ export default function GenresPage() {
                     newGenre.image,
                 ),
                 {
-                    loading: "Actualizando género...",
-                    success: "Género actualizado",
-                    error: "Error al actualizar género",
+                    loading: "Updating the genre...",
+                    success: "Updated",
+                    error: "Error",
                 },
             );
             setGenres(
@@ -109,7 +113,7 @@ export default function GenresPage() {
             setSelectedGenre(null);
             setIsEditDialogOpen(false);
         } catch (err) {
-            toast.error("Error al actualizar género.");
+            toast.error("Error.");
         }
     };
 
@@ -117,13 +121,13 @@ export default function GenresPage() {
         if (appUser?.role !== UserRole.ADMIN_USER || !genres) return;
         try {
             await toast.promise(genreRepo.deleteGenre(id, imageUrl), {
-                loading: "Eliminando género...",
-                success: "Género eliminado",
-                error: "Error al eliminar género",
+                loading: "Deleing...",
+                success: "Deleted",
+                error: "Error",
             });
             setGenres(genres.filter((g) => g.id !== id));
         } catch (err) {
-            toast.error("Error al eliminar género.");
+            toast.error("Error.");
         }
     };
 
@@ -292,7 +296,7 @@ export default function GenresPage() {
                 {isEditDialogOpen && selectedGenre && (
                     <div className="overall | child-center">
                         <div className="form-container">
-                            <h3 className="form-title">Editar Género</h3>
+                            <h3 className="form-title">Edit Genre</h3>
                             <form
                                 onSubmit={handleUpdateGenre}
                                 className="form-body"
@@ -351,13 +355,13 @@ export default function GenresPage() {
                                         }
                                         className="btn-cancel"
                                     >
-                                        Cancelar
+                                        Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         className="btn-submit"
                                     >
-                                        Guardar
+                                        Save
                                     </button>
                                 </div>
                             </form>

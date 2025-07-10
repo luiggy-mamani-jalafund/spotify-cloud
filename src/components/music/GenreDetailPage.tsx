@@ -17,6 +17,7 @@ import Plus from "@/icons/Plus";
 import Pen from "@/icons/Pen";
 import Trash from "@/icons/Trash";
 import Spotify from "@/icons/Spotify";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export default function GenreDetailPage({ genreId }: { genreId: string }) {
     const { appUser, appUserLoading, userLoading } = useAppUser();
@@ -36,6 +37,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
     const genreRepo = new MusicGenreRepository();
     const artistRepo = new ArtistRepository();
     const router = useRouter();
+    const { logPageView } = useAnalytics();
 
     useEffect(() => {
         if (!appUserLoading && !userLoading && !appUser) {
@@ -49,9 +51,13 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
     const fetchGenre = async () => {
         try {
             const fetchedGenre = await genreRepo.getGenre(genreId);
+            logPageView(
+                `/music/genres/${genreId}`,
+                `${fetchedGenre?.name} Genre Page`,
+            );
             setGenre(fetchedGenre);
         } catch (err) {
-            toast.error("Error al cargar género.");
+            toast.error("Error loading genre");
         }
     };
 
@@ -60,7 +66,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             const fetchedArtists = await artistRepo.getArtistsByGenre(genreId);
             setArtists(fetchedArtists);
         } catch (err) {
-            toast.error("Error al cargar artistas.");
+            toast.error("Error loading");
         }
     };
 
@@ -77,9 +83,9 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             const addedArtist = await toast.promise(
                 artistRepo.addArtist(artist, newArtist.image),
                 {
-                    loading: "Agregando artista...",
-                    success: "Artista agregado",
-                    error: "Error al agregar artista",
+                    loading: "Creating artist...",
+                    success: "Created",
+                    error: "Error during the creation",
                 },
             );
             setArtists([...artists, addedArtist]);
@@ -91,7 +97,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             });
             setIsAddArtistDialogOpen(false);
         } catch (err) {
-            toast.error("Error al agregar artista.");
+            toast.error("Error");
         }
     };
 
@@ -110,9 +116,9 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                     newArtist.image,
                 ),
                 {
-                    loading: "Actualizando género...",
-                    success: "Género actualizado",
-                    error: "Error al actualizar género",
+                    loading: "Updating genre...",
+                    success: "Updated",
+                    error: "Error updating",
                 },
             );
             setGenre({ ...selectedGenre, ...updatedGenre });
@@ -125,7 +131,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             setSelectedGenre(null);
             setIsEditGenreDialogOpen(false);
         } catch (err) {
-            toast.error("Error al actualizar género.");
+            toast.error("Error updating.");
         }
     };
 
@@ -150,9 +156,9 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                     newArtist.image,
                 ),
                 {
-                    loading: "Actualizando artista...",
-                    success: "Artista actualizado",
-                    error: "Error al actualizar artista",
+                    loading: "Updaing artist...",
+                    success: "Updated",
+                    error: "Error updating",
                 },
             );
             setArtists(
@@ -169,7 +175,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
             setSelectedArtist(null);
             setIsEditArtistDialogOpen(false);
         } catch (err) {
-            toast.error("Error al actualizar artista.");
+            toast.error("Error updating.");
         }
     };
 
@@ -177,13 +183,13 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
         if (appUser?.role !== UserRole.ADMIN_USER || !artists) return;
         try {
             await toast.promise(artistRepo.deleteArtist(id, imageUrl), {
-                loading: "Eliminando artista...",
-                success: "Artista eliminado",
-                error: "Error al eliminar artista",
+                loading: "Deleting artist...",
+                success: "Deleted",
+                error: "Error deleting",
             });
             setArtists(artists.filter((a) => a.id !== id));
         } catch (err) {
-            toast.error("Error al eliminar artista.");
+            toast.error("Error deleting");
         }
     };
 
@@ -207,7 +213,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
 
                         <p className="paragraph">{genre.description}</p>
                         <p className="font notes-lv1 | placeholder">
-                            {genre.createdAt.toString()}
+                            {genre.createdAt.toDate().toLocaleDateString()}
                         </p>
                         {appUser?.role === UserRole.ADMIN_USER && (
                             <div className="mt-4">
@@ -222,11 +228,9 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                         });
                                         setIsEditGenreDialogOpen(true);
                                     }}
-                                    className="icon-button"
+                                    className="btn-link"
                                 >
-                                    <span className="icon | icon-placeholder-color">
-                                        <Pen />
-                                    </span>
+                                    Edit Artist
                                 </button>
                             </div>
                         )}
@@ -314,14 +318,14 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                 {isAddArtistDialogOpen && (
                     <div className="overall child-center">
                         <div className="form-container">
-                            <h3 className="form-title">Agregar Artista</h3>
+                            <h3 className="form-title">Add Artist</h3>
                             <form
                                 onSubmit={handleAddArtist}
                                 className="form-body"
                             >
                                 <input
                                     type="text"
-                                    placeholder="Nombre del artista"
+                                    placeholder="Enter the name of the artist"
                                     value={newArtist.name}
                                     onChange={(e) =>
                                         setNewArtist({
@@ -334,7 +338,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="País"
+                                    placeholder="Enter the country"
                                     value={newArtist.country}
                                     onChange={(e) =>
                                         setNewArtist({
@@ -347,7 +351,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Biografía"
+                                    placeholder="Enter the bio"
                                     value={newArtist.bio}
                                     onChange={(e) =>
                                         setNewArtist({
@@ -377,13 +381,13 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                         }
                                         className="btn-cancel"
                                     >
-                                        Cancelar
+                                        Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         className="btn-submit"
                                     >
-                                        Agregar
+                                        Add
                                     </button>
                                 </div>
                             </form>
@@ -394,14 +398,14 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                 {isEditGenreDialogOpen && selectedGenre && (
                     <div className="overall child-center">
                         <div className="form-container">
-                            <h3 className="form-title">Editar Género</h3>
+                            <h3 className="form-title">Edit Genre</h3>
                             <form
                                 onSubmit={handleUpdateGenre}
                                 className="form-body"
                             >
                                 <input
                                     type="text"
-                                    placeholder="Nombre del género"
+                                    placeholder="Name of the genre"
                                     value={newArtist.name}
                                     onChange={(e) =>
                                         setNewArtist({
@@ -413,7 +417,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Descripción"
+                                    placeholder="Description"
                                     value={newArtist.bio}
                                     onChange={(e) =>
                                         setNewArtist({
@@ -442,13 +446,13 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                         }
                                         className="btn-cancel"
                                     >
-                                        Cancelar
+                                        Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         className="btn-submit"
                                     >
-                                        Guardar
+                                        Save
                                     </button>
                                 </div>
                             </form>
@@ -459,14 +463,14 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                 {isEditArtistDialogOpen && selectedArtist && (
                     <div className="overall child-center">
                         <div className="form-container">
-                            <h3 className="form-title">Editar Artista</h3>
+                            <h3 className="form-title">Edit Artist</h3>
                             <form
                                 onSubmit={handleUpdateArtist}
                                 className="form-body"
                             >
                                 <input
                                     type="text"
-                                    placeholder="Nombre del artista"
+                                    placeholder="Enter the name of the artist"
                                     value={newArtist.name}
                                     onChange={(e) =>
                                         setNewArtist({
@@ -479,7 +483,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="País"
+                                    placeholder="Enter the country"
                                     value={newArtist.country}
                                     onChange={(e) =>
                                         setNewArtist({
@@ -492,7 +496,7 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Biografía"
+                                    placeholder="Bio"
                                     value={newArtist.bio}
                                     onChange={(e) =>
                                         setNewArtist({
@@ -522,13 +526,13 @@ export default function GenreDetailPage({ genreId }: { genreId: string }) {
                                         }
                                         className="btn-cancel"
                                     >
-                                        Cancelar
+                                        Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         className="btn-submit"
                                     >
-                                        Guardar
+                                        Save
                                     </button>
                                 </div>
                             </form>

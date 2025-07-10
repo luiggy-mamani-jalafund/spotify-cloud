@@ -26,6 +26,7 @@
 .artists-wrapper {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
     padding: 40px 0;
 }
 

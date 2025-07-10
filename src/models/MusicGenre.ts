@@ -1,9 +1,11 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface MusicGenre {
     id?: string;
     name: string;
     description: string;
     color?: string;
-    createdAt: Date;
+    createdAt: Timestamp;
     imageUrl?: string;
 }
 
@@ -20,7 +22,7 @@ export interface Song {
     id?: string;
     name: string;
     duration: number;
-    releaseDate: Date;
+    releaseDate: Timestamp;
     artistId: string;
     genreId: string;
     imageUrl?: string;

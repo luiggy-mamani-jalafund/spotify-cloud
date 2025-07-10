@@ -1,0 +1,5 @@
+.notification {
+    border: 2px solid var(--stroke-second);
+    background-color: var(--bg);
+    padding: 1px;
+}

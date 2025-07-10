@@ -1,0 +1,25 @@
+.app-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.title-subtitle-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    margin-inline: auto;
+}
+
+.title-subtitle-wrapper.with-logo {
+    flex-direction: row;
+    gap: 20px;
+}
+
+.title-subtitle-wrapper.center {
+    width: 100%;
+}

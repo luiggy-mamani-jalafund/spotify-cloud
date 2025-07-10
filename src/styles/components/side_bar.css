@@ -1,0 +1,47 @@
+.side-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 40px 30px 10px 30px;
+}
+
+.side-nav-profile-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    position: relative;
+    cursor: pointer;
+}
+
+.side-nav-profile-photo {
+    --size: 40px;
+    width: var(--size);
+    height: var(--size);
+
+    border-radius: 50%;
+    background: #833ab4;
+    background: linear-gradient(
+        90deg,
+        rgba(131, 58, 180, 1) 0%,
+        rgba(253, 29, 29, 1) 50%,
+        rgba(252, 176, 69, 1) 100%
+    );
+}
+
+.side-nav-profile-info {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+
+    padding: 20px;
+    width: 280px;
+
+    background-color: var(--bg-second);
+    border-radius: 4px;
+    border: 1px solid var(--stroke);
+}

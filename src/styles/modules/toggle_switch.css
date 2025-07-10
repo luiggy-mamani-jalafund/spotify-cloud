@@ -1,0 +1,37 @@
+.toggle-switch-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 20px;
+
+    padding: 20px 0;
+}
+.toggle-switch {
+    display: flex;
+    align-items: center;
+
+    width: 76px;
+    height: 42px;
+    border-radius: 9999px;
+    border: 1px solid var(--text-placeholder);
+    padding: 4px;
+
+    background-color: var(--bg);
+    cursor: pointer;
+    transition: all 500ms ease-in-out;
+}
+
+.toggle-switch.on {
+    justify-content: flex-end;
+}
+
+.toggle-switch.off {
+    justify-content: flex-start;
+}
+
+.toggle-knob {
+    width: 34px;
+    height: 34px;
+    background-color: var(--text-placeholder);
+    border-radius: 50%;
+    transition: all 500ms ease-in-out;
+}

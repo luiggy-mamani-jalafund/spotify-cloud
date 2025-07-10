@@ -1,0 +1,708 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useAppUser } from "@/hooks/useAppUser";
+import { ArtistRepository } from "@/repositories/ArtistRepository";
+import { SongRepository } from "@/repositories/SongRepository";
+import { Artist, Song } from "@/models/MusicGenre";
+import { UserRole } from "@/models/AppUser";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import PageLoader from "../navigation/PageLoader";
+import "@/styles/modules/modal.css";
+import "@/styles/components/songs.css";
+import "@/styles/modules/form.css";
+import Pause from "@/icons/Pause";
+import { Timestamp } from "firebase/firestore";
+import { useAnalytics } from "@/hooks/useAnalytics";
+
+export default function ArtistDetailPage({ artistId }: { artistId: string }) {
+    const { appUser, appUserLoading, userLoading } = useAppUser();
+    const [artist, setArtist] = useState<Artist | null>(null);
+    const [songs, setSongs] = useState<Song[]>([]);
+    const [newSong, setNewSong] = useState({
+        name: "",
+        duration: 0,
+        artistId: "",
+        genreId: "",
+        image: null as File | null,
+        audio: null as File | null,
+    });
+    const [isAddSongDialogOpen, setIsAddSongDialogOpen] = useState(false);
+    const [isEditArtistDialogOpen, setIsEditArtistDialogOpen] = useState(false);
+    const [isEditSongDialogOpen, setIsEditSongDialogOpen] = useState(false);
+    const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+    const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+    const [currentSong, setCurrentSong] = useState<Song | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const router = useRouter();
+    const artistRepo = new ArtistRepository();
+    const songRepo = new SongRepository();
+    const { logPageView, logButtonClick } = useAnalytics();
+
+    useEffect(() => {
+        if (!appUserLoading && !userLoading && !appUser) {
+            router.push("/login");
+        } else if (artistId) {
+            fetchArtist();
+            fetchSongs();
+        }
+    }, [appUser, appUserLoading, userLoading, artistId]);
+
+    useEffect(() => {
+        if (audioRef.current) {
+            const updateTime = () =>
+                setCurrentTime(audioRef.current?.currentTime || 0);
+            audioRef.current.addEventListener("timeupdate", updateTime);
+            return () =>
+                audioRef.current?.removeEventListener("timeupdate", updateTime);
+        }
+    }, [currentSong]);
+
+    const fetchArtist = async () => {
+        try {
+            const fetchedArtist = await artistRepo.getArtist(artistId);
+            setArtist(fetchedArtist);
+            setNewSong((prev) => ({
+                ...prev,
+                artistId,
+                genreId: fetchedArtist?.genreId || "",
+            }));
+            logPageView(
+                `/music/genres/${fetchedArtist?.genreId}/${artistId}`,
+                `${fetchedArtist?.name} Artist Page`,
+            );
+        } catch (err) {
+            toast.error("Error loading the artist");
+        }
+    };
+
+    const fetchSongs = async () => {
+        try {
+            const fetchedSongs = await songRepo.getSongsByArtist(artistId);
+            setSongs(fetchedSongs);
+        } catch (err) {
+            toast.error("Error loading songs");
+        }
+    };
+
+    const handleAddSong = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (appUser?.role !== UserRole.ADMIN_USER) return;
+        try {
+            const addedSong = await toast.promise(
+                songRepo.addSong(
+                    {
+                        name: newSong.name,
+                        duration: newSong.duration,
+                        artistId,
+                        genreId: newSong.genreId,
+                        releaseDate: Timestamp.now(),
+                    },
+                    newSong.image,
+                    newSong.audio,
+                ),
+                {
+                    loading: "Creaing song...",
+                    success: "Created",
+                    error: "Something bad happend creating the song",
+                },
+            );
+            setSongs([...songs, addedSong]);
+            setNewSong({
+                name: "",
+                duration: 0,
+                artistId,
+                genreId: newSong.genreId,
+                image: null,
+                audio: null,
+            });
+            setIsAddSongDialogOpen(false);
+        } catch (err) {
+            toast.error("Error during the creation of the song.");
+        }
+    };
+
+    const handleLike = () => {
+        if (artist) {
+            logButtonClick(
+                "handleLike",
+                `/music/genres/${artist?.genreId}/${artistId}`,
+            );
+            toast.success("Liked");
+        }
+    };
+
+    const handleUpdateArtist = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (appUser?.role !== UserRole.ADMIN_USER || !selectedArtist) return;
+        try {
+            const updatedArtist = {
+                name: newSong.name || selectedArtist.name,
+                country: selectedArtist.country,
+                bio: newSong.name || selectedArtist.bio,
+            };
+            await toast.promise(
+                artistRepo.updateArtist(
+                    selectedArtist.id!,
+                    updatedArtist,
+                    newSong.image,
+                ),
+                {
+                    loading: "Updating artist...",
+                    success: "Updated",
+                    error: "Error updating",
+                },
+            );
+            setArtist({ ...selectedArtist, ...updatedArtist });
+            setNewSong({
+                name: "",
+                duration: 0,
+                artistId,
+                genreId: newSong.genreId,
+                image: null,
+                audio: null,
+            });
+            setSelectedArtist(null);
+            setIsEditArtistDialogOpen(false);
+        } catch (err) {
+            toast.error("Error updating.");
+        }
+    };
+
+    const handleDeleteArtist = async (id: string, imageUrl?: string) => {
+        if (appUser?.role !== UserRole.ADMIN_USER) return;
+        try {
+            await toast.promise(artistRepo.deleteArtist(id, imageUrl), {
+                loading: "Deleting artist...",
+                success: "Deleted",
+                error: "Error deleting",
+            });
+            router.push(`/genres/${artist?.genreId}`);
+        } catch (err) {
+            toast.error("Error deleting.");
+        }
+    };
+
+    const handleUpdateSong = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (appUser?.role !== UserRole.ADMIN_USER || !selectedSong) return;
+        try {
+            const updatedSong = {
+                name: newSong.name || selectedSong.name,
+                duration: newSong.duration || selectedSong.duration,
+            };
+            await toast.promise(
+                songRepo.updateSong(
+                    selectedSong.id!,
+                    updatedSong,
+                    newSong.image,
+                    newSong.audio,
+                ),
+                {
+                    loading: "Updating song...",
+                    success: "Updated",
+                    error: "Something bad happened during the update of the song",
+                },
+            );
+            setSongs(
+                songs.map((s) =>
+                    s.id === selectedSong.id ? { ...s, ...updatedSong } : s,
+                ),
+            );
+            setNewSong({
+                name: "",
+                duration: 0,
+                artistId,
+                genreId: newSong.genreId,
+                image: null,
+                audio: null,
+            });
+            setSelectedSong(null);
+            setIsEditSongDialogOpen(false);
+        } catch (err) {
+            toast.error("Something bad happened updating the song");
+        }
+    };
+
+    const handleDeleteSong = async (
+        id: string,
+        imageUrl?: string,
+        audioUrl?: string,
+    ) => {
+        if (appUser?.role !== UserRole.ADMIN_USER) return;
+        try {
+            await toast.promise(songRepo.deleteSong(id, imageUrl, audioUrl), {
+                loading: "Deleting...",
+                success: "Deleted",
+                error: "Something bad happened",
+            });
+            setSongs(songs.filter((s) => s.id !== id));
+        } catch (err) {
+            toast.error("Error during the song delete action");
+        }
+    };
+
+    const handlePlaySong = (song: Song) => {
+        setCurrentSong(song);
+        if (audioRef.current) {
+            audioRef.current.src = song.audioUrl || "";
+            if (isPlaying) {
+                audioRef.current.pause();
+            } else {
+                audioRef.current
+                    .play()
+                    .catch((err) => console.error("Play failed:", err));
+            }
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const handlePlayAll = () => {
+        if (songs.length > 0) {
+            handlePlaySong(songs[0]);
+        }
+    };
+
+    const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (audioRef.current) {
+            const newTime =
+                (e.target.valueAsNumber / 100) * (currentSong?.duration || 0);
+            audioRef.current.currentTime = newTime;
+            setCurrentTime(newTime);
+        }
+    };
+
+    if (!appUser || !artist) {
+        return <PageLoader />;
+    }
+
+    return (
+        <div className="artist-page">
+            <div className="artist-header">
+                {artist.imageUrl && (
+                    <img
+                        src={artist.imageUrl}
+                        alt={artist.name}
+                        className="artist-cover"
+                    />
+                )}
+                <div className="artist-header-info">
+                    <span className="playlist-type">Artista</span>
+                    <h1 className="artist-title">{artist.name}</h1>
+                    <p className="artist-description">{artist.bio}</p>
+                    <span className="artist-country">
+                        Country: {artist.country}
+                    </span>
+                </div>
+            </div>
+
+            <div className="artist-actions-bar">
+                <button className="btn-play" onClick={handlePlayAll}>
+                    ▶
+                </button>
+                <button className="btn-icon" onClick={handleLike}>
+                    ❤
+                </button>
+
+                {appUser?.role === UserRole.ADMIN_USER && (
+                    <div className="admin-actions">
+                        <button
+                            onClick={() =>
+                                handleDeleteArtist(artist.id!, artist.imageUrl)
+                            }
+                            className="btn-link delete"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            <div className="songs-table-header">
+                <div>#</div>
+                <div>Title</div>
+                <div>Album</div>
+                <div>Date</div>
+                <div>Duration</div>
+            </div>
+
+            <div className="songs-list">
+                {songs.map((song, index) => {
+                    console.log(song.releaseDate);
+
+                    return (
+                        <div key={song.id} className="song-row">
+                            <button
+                                className="btn-play-small"
+                                onClick={() => handlePlaySong(song)}
+                            >
+                                ▶
+                            </button>
+                            <div className="song-title">
+                                {song.imageUrl && (
+                                    <img
+                                        src={song.imageUrl}
+                                        alt={song.name}
+                                        className="song-thumbnail"
+                                    />
+                                )}
+                                <div>
+                                    <div className="song-name">{song.name}</div>
+                                    <div className="song-artist">
+                                        {artist.name}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="song-album">
+                                Album {artist.name}
+                            </div>
+                            <div className="song-date">
+                                {song.releaseDate.toDate().toLocaleDateString()}
+                            </div>
+                            <div className="song-duration">
+                                {Math.floor(song.duration / 60)}:
+                                {(song.duration % 60)
+                                    .toString()
+                                    .padStart(2, "0")}
+                            </div>
+
+                            {appUser?.role === UserRole.ADMIN_USER && (
+                                <div className="song-row-actions">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedSong(song);
+                                            setNewSong({
+                                                name: song.name,
+                                                duration: song.duration,
+                                                artistId,
+                                                genreId: song.genreId,
+                                                image: null,
+                                                audio: null,
+                                            });
+                                            setIsEditSongDialogOpen(true);
+                                        }}
+                                        className="btn-link"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            handleDeleteSong(
+                                                song.id!,
+                                                song.imageUrl,
+                                                song.audioUrl,
+                                            )
+                                        }
+                                        className="btn-link delete"
+                                    >
+                                        Eliminar
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+
+            <audio ref={audioRef} onEnded={() => setIsPlaying(false)} />
+            {currentSong && (
+                <div className="player-bar">
+                    <img
+                        src={currentSong.imageUrl || ""}
+                        alt={currentSong.name}
+                        className="player-cover"
+                    />
+                    <div className="player-info">
+                        <div className="player-title">{currentSong.name}</div>
+                        <div className="player-artist">{artist.name}</div>
+                    </div>
+                    <button
+                        className="player-btn-play"
+                        onClick={() => {
+                            if (audioRef.current) {
+                                if (isPlaying) {
+                                    audioRef.current.pause();
+                                } else {
+                                    audioRef.current
+                                        .play()
+                                        .catch((err) =>
+                                            console.error("Play failed:", err),
+                                        );
+                                }
+                                setIsPlaying(!isPlaying);
+                            }
+                        }}
+                    >
+                        {isPlaying ? (
+                            <span className="icon icon-ssm">
+                                <Pause />
+                            </span>
+                        ) : (
+                            <span style={{ color: "#000" }}>▶</span>
+                        )}
+                    </button>
+                    <div className="player-progress">
+                        <span>
+                            {Math.floor(currentTime / 60)}:
+                            {(Math.floor(currentTime) % 60)
+                                .toString()
+                                .padStart(2, "0")}
+                        </span>
+                        <input
+                            type="range"
+                            className="player-slider"
+                            min="0"
+                            max="100"
+                            value={
+                                (currentTime / (currentSong.duration || 1)) *
+                                100
+                            }
+                            onChange={handleSliderChange}
+                        />
+                        <span>
+                            {Math.floor(currentSong.duration / 60)}:
+                            {(currentSong.duration % 60)
+                                .toString()
+                                .padStart(2, "0")}
+                        </span>
+                    </div>
+                </div>
+            )}
+
+            {appUser?.role === UserRole.ADMIN_USER && (
+                <div className="add-song-wrapper">
+                    <button
+                        onClick={() => setIsAddSongDialogOpen(true)}
+                        className="btn-add-song"
+                    >
+                        Add Song
+                    </button>
+                </div>
+            )}
+
+            {isAddSongDialogOpen && (
+                <div className="overall child-center">
+                    <div className="form-container">
+                        <h3 className="form-title">Add Song</h3>
+                        <form onSubmit={handleAddSong} className="form-body">
+                            <input
+                                type="text"
+                                placeholder="Enter the name of the song"
+                                value={newSong.name}
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        name: e.target.value,
+                                    })
+                                }
+                                className="form-input"
+                                required
+                            />
+                            <input
+                                type="number"
+                                placeholder="Duration (seg)"
+                                value={newSong.duration ?? 0}
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        duration: parseInt(e.target.value),
+                                    })
+                                }
+                                className="form-input"
+                                required
+                            />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        image: e.target.files?.[0] || null,
+                                    })
+                                }
+                                className="form-input"
+                            />
+                            <input
+                                type="file"
+                                accept="audio/mp3"
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        audio: e.target.files?.[0] || null,
+                                    })
+                                }
+                                className="form-input"
+                            />
+                            <div className="form-actions">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setIsAddSongDialogOpen(false)
+                                    }
+                                    className="btn-cancel"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-submit">
+                                    Add
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isEditArtistDialogOpen && selectedArtist && (
+                <div className="overall child-center">
+                    <div className="form-container">
+                        <h3 className="form-title">Edit Artist</h3>
+                        <form
+                            onSubmit={handleUpdateArtist}
+                            className="form-body"
+                        >
+                            <input
+                                type="text"
+                                placeholder="Name of the artist"
+                                value={newSong.name}
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        name: e.target.value,
+                                    })
+                                }
+                                className="form-input"
+                                required
+                            />
+                            <input
+                                type="text"
+                                placeholder="País"
+                                value={newSong.name}
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        name: e.target.value,
+                                    })
+                                }
+                                className="form-input"
+                                required
+                            />
+                            <input
+                                type="text"
+                                placeholder="Enter their bio"
+                                value={newSong.name}
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        name: e.target.value,
+                                    })
+                                }
+                                className="form-input"
+                                required
+                            />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        image: e.target.files?.[0] || null,
+                                    })
+                                }
+                                className="form-input"
+                            />
+                            <div className="form-actions">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setIsEditArtistDialogOpen(false)
+                                    }
+                                    className="btn-cancel"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-submit">
+                                    Save
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isEditSongDialogOpen && selectedSong && (
+                <div className="overall child-center">
+                    <div className="form-container">
+                        <h3 className="form-title">Edit Song</h3>
+                        <form onSubmit={handleUpdateSong} className="form-body">
+                            <input
+                                type="text"
+                                placeholder="Name of the song"
+                                value={newSong.name}
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        name: e.target.value,
+                                    })
+                                }
+                                className="form-input"
+                                required
+                            />
+                            <input
+                                type="number"
+                                placeholder="Duration (seg)"
+                                value={newSong.duration}
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        duration: parseInt(e.target.value),
+                                    })
+                                }
+                                className="form-input"
+                                required
+                            />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        image: e.target.files?.[0] || null,
+                                    })
+                                }
+                                className="form-input"
+                            />
+                            <input
+                                type="file"
+                                accept="audio/mp3"
+                                onChange={(e) =>
+                                    setNewSong({
+                                        ...newSong,
+                                        audio: e.target.files?.[0] || null,
+                                    })
+                                }
+                                className="form-input"
+                            />
+                            <div className="form-actions">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setIsEditSongDialogOpen(false)
+                                    }
+                                    className="btn-cancel"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-submit">
+                                    Save
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

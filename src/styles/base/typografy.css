@@ -1,0 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+/* Titles (Regular weight, normal style) */
+@font-face {
+    font-family: "SofiaSans";
+    src: url("/fonts/Sofia_Sans/SofiaSans-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Titles - 14pt */
+@font-face {
+    font-family: "SofiaSans14";
+    src: url("/fonts/Sofia_Sans/SofiaSans-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Titles - 18pt */
+@font-face {
+    font-family: "SofiaSans18";
+    src: url("/fonts/Sofia_Sans/SofiaSans-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Regular */
+@font-face {
+    font-family: "SofiaSansBody";
+    src: url("/fonts/Sofia_Sans/SofiaSans-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}

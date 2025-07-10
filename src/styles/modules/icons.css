@@ -1,0 +1,149 @@
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.666666667rem;
+    transition: all ease-out 200ms;
+}
+
+.icon.icon-hover {
+    opacity: 0.6;
+}
+
+.icon.icon-hover:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.icon.square {
+    padding: 6px;
+border-radius: 4px;
+
+    background-color: var(--bg);
+    border: 2px solid var(--text);
+}
+
+.icon.square > svg {
+    color: var(--main-color) !important;
+    fill: var(--main-color) !important;
+}
+
+.icon.square.error {
+    padding: 5px;
+
+    background-color: var(--error);
+    border: none;
+}
+
+.icon.square.call {
+    padding: 5px;
+
+    background-color: var(--main-color);
+    border: none;
+}
+
+.icon.square.call > svg {
+    color: var(--bg) !important;
+    fill: var(--bg) !important;
+}
+
+.icon.square.center {
+    margin-inline: auto;
+}
+
+.icon.square > svg {
+    color: var(--text) !important;
+}
+
+/* sizes */
+.icon > svg {
+    width: 20px;
+    height: 20px;
+}
+
+.icon-ssm > svg {
+    width: 13px;
+    height: 13px;
+}
+
+.icon-sm > svg {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-md > svg {
+    width: 24px;
+    height: 24px;
+}
+
+.icon-lg > svg {
+    width: 28px;
+    height: 28px;
+}
+
+.icon-xl > svg {
+    width: 32px;
+    height: 32px;
+}
+
+.icon-xxl > svg {
+    width: 72px;
+    height: 72px;
+}
+
+.icon-xxxl > svg {
+    width: 46px;
+    height: 46px;
+}
+
+.icon-xspecial > svg {
+    width: 58px;
+    height: 58px;
+}
+
+/* COLOR ICON */
+
+.icon.icon-text-color > svg {
+    color: var(--text) !important;
+    fill: var(--text) !important;
+}
+
+.icon.icon-placeholder-color > svg {
+    color: var(--text-placeholder) !important;
+    fill: var(--text-placeholder) !important;
+}
+
+.icon.icon-bg-color > svg {
+    color: var(--bg) !important;
+    fill: var(--bg) !important;
+}
+
+.icon.icon-main-color > svg {
+    color: var(--main-color) !important;
+    fill: var(--main-color) !important;
+}
+
+.icon.icon-success-color > svg {
+    color: var(--success) !important;
+    fill: var(--success) !important;
+}
+
+.icon.icon-error-color > svg {
+    color: var(--error) !important;
+    fill: var(--error) !important;
+}
+
+.rotate-icon {
+    transform: rotate(-90deg);
+}
+
+.icon[data-forced-theme="light"] > svg,
+.icon[data-forced-theme="system"] > svg {
+    color: var(--text-light) !important;
+    fill: var(--text-light) !important;
+}
+
+.icon[data-forced-theme="dark"] > svg {
+    color: var(--text-dark) !important;
+    fill: var(--text-dark) !important;
+}

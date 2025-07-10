@@ -1,0 +1,55 @@
+.genre-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    padding: 0px 40px 40px 40px;
+}
+
+.genres-wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 400px;
+    gap: 16px;
+}
+
+.genre-item {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all ease-out 200ms;
+
+    padding: 18px;
+}
+
+.genre-item:hover {
+    transform: scale(1.02);
+}
+
+.genre-item-img {
+    position: absolute;
+    bottom: -30px;
+    right: -25px;
+
+    height: 80%;
+    border-radius: 4px;
+    transform: rotate(12deg);
+}
+
+.genre-item-title {
+    font-size: 48px;
+    font-weight: bolder;
+}
+
+.genre-item-title-more {
+    position: absolute;
+    bottom: 18px;
+    left: 18px;
+}
+
+.genre-options {
+    display: flex;
+    gap: 10px;
+    position: absolute;
+    top: 24px;
+    right: 24px;
+}

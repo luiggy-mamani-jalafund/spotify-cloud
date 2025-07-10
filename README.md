@@ -2,8 +2,8 @@
 
 ### _Luiggy Mamani Condori_
 
-<video width="320" height="240" controls>
-  <source src="public/demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+Click **on the image** to watch the video on Google Drive
 
+[![Ver video](public/demo-view.png)](https://drive.google.com/file/d/1IP1piVoKGZLcZdY29muULk_JTnKQliX2/view?usp=sharing)
+
+Link: [https://drive.google.com/file/d/1IP1piVoKGZLcZdY29muULk_JTnKQliX2/view?usp=sharing](https://drive.google.com/file/d/1IP1piVoKGZLcZdY29muULk_JTnKQliX2/view?usp=sharing)

@@ -1,7 +1,8 @@
 import GenreDetailPage from "@/components/music/GenreDetailPage";
 import NavBar from "@/components/navigation/NavBar";
 
-const Page = ({ params }: { params: any }) => {
+const Page = async (props: { params: Promise<any> }) => {
+    const params = await props.params;
     return (
         <div>
             <NavBar />
